@@ -1,4 +1,4 @@
-define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Letter', 'entities/Attractor', 'entities/Particle', 'Stats', 'dat', 'entities/Triangle', 'helpers/ColorHelper'], function(Resize, Mouse, MathHelper, Letter, Attractor, Particle, Stats, dat, Triangle, ColorHelper) {
+define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Letter', 'entities/Attractor', 'entities/Particle', 'Stats', 'dat', 'entities/Triangle', 'helpers/ColorHelper', 'fluid/Fluid'], function(Resize, Mouse, MathHelper, Letter, Attractor, Particle, Stats, dat, Triangle, ColorHelper, Fluid) {
 
     var Playground = function()
     {
@@ -18,7 +18,7 @@ define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Lette
         init: function()
         {
             // Mouse init
-            this.mouse = new Mouse(Resize.screenWidth, Resize.screenHeight);
+            this.mouse = Mouse;//new Mouse(Resize.screenWidth, Resize.screenHeight);
 
             // Renderer init
             this.canvas = document.createElement('canvas');
@@ -30,14 +30,15 @@ define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Lette
             Resize.enableSmoothing(false);
 
             // Variables
-            this.words = ["purple", "means", "disorder"];
-            this.wordIndex = 0;
-            this.letterGroups = [];
-            this.onExploded();
+            // this.words = ["purple", "means", "disorder"];
+            // this.wordIndex = 0;
+            // this.letterGroups = [];
+            // this.onExploded();
 
+            // this.particles = [];
+            // this.particlesNumber = 200;
 
-            this.particles = [];
-            this.particlesNumber = 200;
+            this.fluid = new Fluid(Resize.screenWidth, Resize.screenHeight, 5000);
 
             window.addEventListener('resize', this.onResize.bind(this));
         },
@@ -82,12 +83,14 @@ define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Lette
                 this.stats.update();
             }
 
+            this.fluid.update(this.context);
+
             // EXPERIMENT LOGIC
             // this.letters.drawBatch("abf", this.context, Resize.halfScreenWidth, Resize.halfScreenHeight);
-            for(var i = 0; i < this.letterGroups.length; i++) {
-                for(var j = 0; j < this.letterGroups[i].length; j++) {
-                    this.letterGroups[i][j].draw(this.context, Resize.halfScreenWidth, Resize.halfScreenHeight);
-                }
+            // for(var i = 0; i < this.letterGroups.length; i++) {
+            //     for(var j = 0; j < this.letterGroups[i].length; j++) {
+            //         this.letterGroups[i][j].draw(this.context, Resize.halfScreenWidth, Resize.halfScreenHeight);
+            //     }
                 /*if(this.enableRepel) {
                     if(dist <= 100) {
                         for(var j = 0; j < this.letters[i].points.length; j++) {
@@ -97,7 +100,7 @@ define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Lette
                         }
                     }
                 }*/
-            }
+            // }
 
             requestAnimationFrame(this.animate.bind(this));
         },

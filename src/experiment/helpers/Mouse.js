@@ -1,7 +1,7 @@
 define(function() {
     var Mouse = function(x, y) {
-        this.x = x;
-        this.y = y;
+        this.x = x || 0;
+        this.y = y || 0;
 
         this.ox = x;
         this.oy = y;
@@ -36,5 +36,7 @@ define(function() {
         }
     };
 
-    return Mouse;
+    var MouseSingleton = new Mouse();
+
+    return MouseSingleton;
 });
