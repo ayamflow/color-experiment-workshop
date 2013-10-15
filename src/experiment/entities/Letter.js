@@ -51,8 +51,8 @@ define(['data/Letters', 'entities/Vector', 'entities/LetterPoint', 'entities/Mov
                 this.drawLines(context, this.points[i], this.points[i+1], 120);
 
                 // Update movings
-                // this.movings[i].path(this.letter[0], 2);
-                this.movings[i].seek(this.position);
+                this.movings[i].path(this.letter[0], 2);
+                // this.movings[i].seek(this.position);
                 this.movings[i].update(context);
             }
 

@@ -1,102 +1,102 @@
-define(function() {
+define(['entities/Vector'], function(Vector) {
    var Letters = {
         a: [
             [
-                {x: 0, y: 2},
-                {x: 0, y: 1},
-                {x: 0, y: 0},
-                {x: 1, y: 0},
-                {x: 1, y: 1},
-                {x: 1, y: 2}
+                new Vector(0, 2),
+                new Vector(0, 1),
+                new Vector(0, 0),
+                new Vector(1, 0),
+                new Vector(1, 1),
+                new Vector(1, 2)
             ],
             [
-                {x: 0, y: 1},
-                {x: 1, y: 1}
+                new Vector(0, 1),
+                new Vector(1, 1)
             ]
         ],
         b: [
             [
-                {x: 0, y: 2},
-                {x: 0, y: 0},
-                {x: 1, y: 0},
-                {x: 1, y: 2},
-                {x: 0, y: 2}
+                new Vector(0, 2),
+                new Vector(0, 0),
+                new Vector(1, 0),
+                new Vector(1, 2),
+                new Vector(0, 2)
             ],
             [
-                {x: 0, y: 1},
-                {x: 1, y: 1}
+                new Vector(0, 1),
+                new Vector(1, 1)
             ]
         ],
         c: [
             [
-                {x: 1, y: 0},
-                {x: 0, y: 0},
-                {x: 0, y: 1},
-                {x: 0, y: 2},
-                {x: 1, y: 2}
+                new Vector(1, 0),
+                new Vector(0, 0),
+                new Vector(0, 1),
+                new Vector(0, 2),
+                new Vector(1, 2)
             ]
         ],
         e: [
             [
-                {x: 1, y: 0},
-                {x: 0, y: 0},
-                {x: 0, y: 1},
-                {x: 0, y: 2},
-                {x: 1, y: 2}
+                new Vector(1, 0),
+                new Vector(0, 0),
+                new Vector(0, 1),
+                new Vector(0, 2),
+                new Vector(1, 2)
             ],
             [
-                {x: 0, y: 1},
-                {x: 1, y: 1}
+                new Vector(0, 1),
+                new Vector(1, 1)
             ]
         ],
         l: [
             [
-                {x: 0, y: 0},
-                {x: 0, y: 1},
-                {x: 0, y: 2},
-                {x: 1, y: 2}
+                new Vector(0, 0),
+                new Vector(0, 1),
+                new Vector(0, 2),
+                new Vector(1, 2)
             ]
         ],
         o: [
             [
-                {x: 1, y: 0},
-                {x: 0, y: 0},
-                {x: 0, y: 1},
-                {x: 0, y: 2},
-                {x: 1, y: 2},
-                {x: 1, y: 1},
-                {x: 1, y: 0}
+                new Vector(1, 0),
+                new Vector(0, 0),
+                new Vector(0, 1),
+                new Vector(0, 2),
+                new Vector(1, 2),
+                new Vector(1, 1),
+                new Vector(1, 0)
             ]
         ],
         p: [
             [
-                {x: 0, y: 2},
-                {x: 0, y: 1},
-                {x: 0, y: 0},
-                {x: 1, y: 0},
-                {x: 1, y: 1},
-                {x: 0, y: 1}
+                new Vector(0, 2),
+                new Vector(0, 1),
+                new Vector(0, 0),
+                new Vector(1, 0),
+                new Vector(1, 1),
+                new Vector(0, 1)
             ]
         ],
         r: [
             [
-                {x: 0, y: 2},
-                {x: 0, y: 1},
-                {x: 0, y: 0},
-                {x: 1, y: 0},
-                {x: 1, y: 1},
-                {x: 0, y: 1},
-                {x: 1, y: 2}
+                new Vector(0, 2),
+                new Vector(0, 1),
+                new Vector(0, 0),
+                new Vector(1, 0),
+                new Vector(1, 1),
+                new Vector(0, 1),
+                new Vector(1, 2)
             ]
         ],
         u: [
             [
-                {x: 0, y: 0},
-                {x: 0, y: 1},
-                {x: 0, y: 2},
-                {x: 1, y: 2},
-                {x: 1, y: 1},
-                {x: 1, y: 0}
+                new Vector(0, 0),
+                new Vector(0, 1),
+                new Vector(0, 2),
+                new Vector(1, 2),
+                new Vector(1, 1),
+                new Vector(1, 0)
             ]
         ]
     };

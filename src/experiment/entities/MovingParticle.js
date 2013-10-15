@@ -20,9 +20,8 @@ define(['entities/Vector', 'helpers/MathHelper'], function(Vector, MathHelper) {
         path: function(points, loop) {
             // Loop = 0 (no), 1(yes), 2(reverse)
             loop = loop || 0;
-            var tempPoint = points[this.pathIndex];
-            if(tempPoint === null) return;
-            var point = new Vector(tempPoint.x, tempPoint.y);
+            var point = points[this.pathIndex];
+            if(point === null) return;
 
             if(this.position.dist(point) < this.pathThreshold) {
                 if(this.pathIndex >= path.length -1) {
@@ -65,7 +64,7 @@ define(['entities/Vector', 'helpers/MathHelper'], function(Vector, MathHelper) {
         update: function(context) {
             this.steeringForce.truncate(this.maxForce).divide(this.mass);
             this.velocity.add(this.steeringForce);
-            this.steeringForce.zero();
+            this.steeringForce.multiply(0);
 
             this.velocity.truncate(this.maxSpeed);
             this.position.add(this.velocity);
@@ -82,18 +81,10 @@ define(['entities/Vector', 'helpers/MathHelper'], function(Vector, MathHelper) {
         },
 
         draw:  function(context) {
-            // context.fillStyle = '#0000FF';
-            // context.fillRect(this.position.x, this.position.y, 10, 10);
-            context.save();
-            context.translate(this.position.x, this.position.y);
-            context.rotate(this.velocity.angle());
             context.beginPath();
-            context.moveTo(this.size, 0);
-            context.lineTo(-this.size, this.size / 2);
-            context.lineTo(-this.size, -this.size / 2);
-            context.lineTo(this.size, 0);
+            context.fillStyle = '#0000FF';
+            context.fillRect(this.position.x, this.position.y, 10, 10);
             context.fill();
-            context.restore();
         },
     };
 
