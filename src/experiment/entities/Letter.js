@@ -1,95 +1,20 @@
-define(['entities/LetterPoint', 'helpers/MathHelper'], function(LetterPoint, MathHelper) {
+define(['data/Letters', 'entities/Vector', 'entities/LetterPoint', 'entities/MovingParticle', 'helpers/MathHelper'], function(Letters, Vector, LetterPoint, MovingParticle, MathHelper) {
     var Letter = function(letter, x, y, width, height, spacing) {
         this.width = width;
         this.height = height;
         this.spacing = spacing;
 
-        this.letters = {
-            a: [
-                [
-                    {x: 0, y: 2},
-                    {x: 0, y: 1},
-                    {x: 0, y: 0},
-                    {x: 1, y: 0},
-                    {x: 1, y: 1},
-                    {x: 1, y: 2}
-                ],
-                [
-                    {x: 0, y: 1},
-                    {x: 1, y: 1}
-                ]
-            ],
-            b: [
-                [
-                    {x: 0, y: 2},
-                    {x: 0, y: 0},
-                    {x: 1, y: 0},
-                    {x: 1, y: 2},
-                    {x: 0, y: 2}
-                ],
-                [
-                    {x: 0, y: 1},
-                    {x: 1, y: 1}
-                ]
-            ],
-            l: [
-                [
-                    {x: 0, y: 0},
-                    {x: 0, y: 1},
-                    {x: 0, y: 2},
-                    {x: 1, y: 2}
-                ]
-            ],
-            p: [
-                [
-                    {x: 0, y: 2},
-                    {x: 0, y: 1},
-                    {x: 0, y: 0},
-                    {x: 1, y: 0},
-                    {x: 1, y: 1},
-                    {x: 0, y: 1}
-                ]
-            ],
-            r: [
-                [
-                    {x: 0, y: 2},
-                    {x: 0, y: 1},
-                    {x: 0, y: 0},
-                    {x: 1, y: 0},
-                    {x: 1, y: 1},
-                    {x: 0, y: 1},
-                    {x: 1, y: 2}
-                ]
-            ],
-            u: [
-                [
-                    {x: 0, y: 0},
-                    {x: 0, y: 1},
-                    {x: 0, y: 2},
-                    {x: 1, y: 2},
-                    {x: 1, y: 1},
-                    {x: 1, y: 0}
-                ]
-            ],
-            f: [
-                [
-                    {x: 0, y: 2},
-                    {x: 0, y: 1},
-                    {x: 0, y: 0},
-                    {x: 1, y: 0}
-                ],
-                [
-                    {x: 0, y: 1},
-                    {x: 1, y: 1}
-                ]
-            ]
-        };
-        this.letter = this.letters[letter];
+        this.position = new Vector(x, y);
+
+        this.letter = Letters[letter];
 
         this.points = [];
+        this.movings = [];
         for(var i = 0; i < this.letter.length; i++) {
             for(var j = 0; j < this.letter[i].length; j++) {
-                this.points.push(new LetterPoint(x + this.width * this.letter[i][j].x, y + this.height * this.letters[letter][i][j].y, 10));
+                this.points.push(new LetterPoint(x + this.width * this.letter[i][j].x, y + this.height * this.letter[i][j].y, 10));
+
+                this.movings.push(new MovingParticle(x + this.width * this.letter[i][j].x, y + this.height * this.letter[i][j].y, 10));
             }
         }
     };
@@ -120,10 +45,17 @@ define(['entities/LetterPoint', 'helpers/MathHelper'], function(LetterPoint, Mat
             context.stroke();
             context.closePath();*/
 
+            // Link points
             for(i = 0; i < this.points.length - 1; i++) {
                 this.points[i].update(context);
                 this.drawLines(context, this.points[i], this.points[i+1], 120);
+
+                // Update movings
+                // this.movings[i].path(this.letter[0], 2);
+                this.movings[i].seek(this.position);
+                this.movings[i].update(context);
             }
+
         },
 
         drawLines: function(context, point, nextPoint, threshold) {

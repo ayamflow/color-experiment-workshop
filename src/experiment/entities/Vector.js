@@ -43,12 +43,36 @@ define(function() {
             return this.x * vector.x + this.y * vector.y;
         },
 
-        length: function() {
-            return Math.sqrt(this.x * this.x + this.y * this.y);
+        length: function(value) {
+            if(value === undefined) {
+                return Math.sqrt(this.x * this.x + this.y * this.y);
+            }
+            else {
+                this.x = Math.cos(this.angle) * value;
+                this.y = Math.sin(this.angle) * value;
+                return this;
+            }
+        },
+
+        dist: function (vector) {
+            return Math.sqrt(this.distSq(vector));
+        },
+
+        distSq: function (vector) {
+            var dx = vector.x - this.x;
+            var dy = vector.y - this.y;
+            return dx * dx + dy * dy;
         },
 
         cross: function(vector) {
 
+        },
+
+        truncate: function(max) {
+            if(this.length() > max) {
+                return this.length(max);
+            }
+            else return this;
         },
 
         normalize: function() {
@@ -56,7 +80,7 @@ define(function() {
         },
 
         angle: function() {
-            return Math.atan(this.y, this.x);
+            return Math.atan2(this.y, this.x);
         },
 
         toArray: function(n) {
@@ -67,7 +91,12 @@ define(function() {
             return new Vector(this.x, this.y);
         },
 
-        init: function(x, y) {
+        zero: function() {
+            this.x = this.y = 0;
+            return this;
+        },
+
+        set: function(x, y) {
             this.x = x;
             this.y = y;
          return this;

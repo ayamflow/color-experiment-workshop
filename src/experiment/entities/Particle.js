@@ -4,22 +4,19 @@ define(['entities/Vector'], function(Vector) {
         this.velocity = new Vector();
         this.acceleration = new Vector();
         this.mass = 10;
-
-        this.frictionCoeff = 0.01;
-        this.frictionNormal = 1;
     };
 
     Particle.prototype = {
         applyForce: function(force) {
-            this.acceleration = force.divide(this.mass);
+            this.acceleration.add(force.divide(this.mass));
         },
 
         update: function(context) {
-            // this.friction = this.velocity.clone().normalize().multiply(-1).multiply(this.frictionNormal * this.frictionCoeff);
-            // this.applyForce(this.friction);
             this.velocity.add(this.acceleration);
             this.position.add(this.velocity);
             // this.draw(context);
+
+            this.acceleration.multiply(0);
         },
 
         draw: function(context) {

@@ -6,14 +6,19 @@ define(['entities/Vector'], function(Vector) {
     };
 
     Attractor.prototype = {
-        attract: function(particle) {
+        attract: function(particle, direction) {
+            direction = direction || 1;
             var force = this.position.clone().subtract(particle.position);
             var distance = force.length();
             distance = Math.max(5, Math.min(10, distance));
             force.normalize();
-            var strength = (this.gravityConstant * this.mass * particle.mass) / (distance * distance);
+            var strength = direction * (this.gravityConstant * this.mass * particle.mass) / (distance * distance);
             force.multiply(strength);
             return force;
+        },
+
+        repel: function(particle) {
+            return this.attract(particle, -2);
         },
 
         draw: function(context) {

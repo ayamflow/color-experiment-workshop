@@ -30,17 +30,18 @@ define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Lette
             Resize.enableSmoothing(false);
 
             // Variables
-            var word = "prpl".split('');
+            this.enableRepel = false;
+            var word = "coucou".split('');
             this.letters = [];
+            var startX = Resize.halfScreenWidth - (word.length * 100) / 2;
             for(var i = 0; i < word.length; i++) {
-                this.letters[i] = new Letter(word[i], i * 100 + Resize.halfScreenWidth, Resize.halfScreenHeight, 70, 70, 50);
+                this.letters[i] = new Letter(word[i], i * 100 + startX, Resize.halfScreenHeight, 70, 70, 50);
             }
 
             this.particles = [];
             this.particlesNumber = 200;
-            // for(var i = 0; i < this.particlesNumber; i++) {
-            //     this.particles.push(new Particle(MathHelper.rand(0, Resize.screenWidth), MathHelper.rand(0, Resize.screenHeight)));
-            // }
+
+            this.repeller = new Attractor(Resize.screenWidth, Resize.screenHeight);
 
             window.addEventListener('resize', this.onResize.bind(this));
         },
@@ -63,45 +64,31 @@ define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Lette
             // this.letters.drawBatch("abf", this.context, Resize.halfScreenWidth, Resize.halfScreenHeight);
             for(var i = 0; i < this.letters.length; i++) {
                 this.letters[i].draw(this.context, Resize.halfScreenWidth, Resize.halfScreenHeight);
+                /*if(this.enableRepel) {
+                    if(dist <= 100) {
+                        for(var j = 0; j < this.letters[i].points.length; j++) {
+                            for(var k = 0; k < this.letters[i].points[j].particles.length; k++) {
+                                this.letters[i].points[j].particles[k].applyForce(this.repeller.attract(this.letters[i].points[j].particles[k]));
+                            }
+                        }
+                    }
+                }*/
             }
 
-            // this.attractor.position.x = this.mouse.x;
-            // this.attractor.position.y = this.mouse.y;
-            // this.attractor.draw(this.context);
-
-            // for(var i = 0; i < this.particlesNumber; i++) {
-                // for(var a = 0; a < this.letters.attractors.length; a++) {
-                    // this.particles[i].applyForce(this.letters.attractors[a].attract(this.particles[i]));
-                // }
-                // this.particles[i].applyForce(this.letters.attractors[0].attract(this.particles[i]));
-                // this.particles[i].applyForce(this.attractor.attract(this.particles[i]));
-                // console.log(i, this.particles[i].position.x, this.particles[i].position.y);
-                // this.particles[i].update(this.context);
-
-                // this.drawLines(i, this.particles[i], 30);
-            // }
+            this.repeller.position.x = this.mouse.x;
+            this.repeller.position.y = this.mouse.y;
+            this.repeller.draw(this.context);
 
             requestAnimationFrame(this.animate.bind(this));
         },
 
-        drawLines: function(i, particle, threshold) {
-            var dist, particle2;
-            for(j = i + 1; j < this.particlesNumber; j++) {
-                particle2 = this.particles[j];
-                dist = MathHelper.pDist(particle.position, particle2.position);
-                if(dist <= threshold) {
-                    this.context.beginPath();
-                    this.context.strokeStyle = 'rgba(255, 255, 255, ' + (1-dist/threshold) +')';
-                    this.context.moveTo(particle.position.x, particle.position.y);
-                    this.context.lineTo(particle2.position.x, particle2.position.y);
-                    this.context.stroke();
-                    this.context.closePath();
-                }
-            }
+        explode: function() {
+            this.enableRepel = true;
         },
 
         createGUI: function() {
             this.gui = new dat.GUI();
+            this.gui.add(this, 'enableRepel');
         },
 
         debug: function() {
