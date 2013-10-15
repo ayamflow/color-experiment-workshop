@@ -14,13 +14,13 @@ define(['entities/Vector'], function(Vector) {
         update: function(context) {
             this.velocity.add(this.acceleration);
             this.position.add(this.velocity);
-            // this.draw(context);
+            this.draw(context);
 
             this.acceleration.multiply(0);
         },
 
         draw: function(context) {
-            context.fillStyle = '#fff';
+            context.fillStyle = '#880066';
             // context.moveTo(this.position.x, this.position.y);
             // context.arc(this.position.x, this.position.y, 1, 0, 2 * Math.PI, true);
             // context.fill();

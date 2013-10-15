@@ -5,7 +5,10 @@ require.config({
         Leap: '../../lib/leap.min',
         PIXI: '../../lib/pixi/bin/pixi',
         THREE: '../../lib/threejs/build/three.min',
-        dat: '../../lib/dat.gui.min'
+        dat: '../../lib/dat.gui.min',
+        tinycolor: '../../lib/tinycolor.min',
+        TweenMax: '../../lib/TweenMax.min',
+        signals: '../../lib/signals.min',
     },
     shim: {
         'Stats': {
@@ -22,6 +25,15 @@ require.config({
         },
         'dat': {
             exports: 'dat'
+        },
+        'tinycolor': {
+            exports: 'tinycolor'
+        },
+        'TweenMax': {
+            exports: 'TweenMax'
+        },
+        'signals': {
+            exports: 'signals'
         }
     }
 });

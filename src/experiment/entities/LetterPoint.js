@@ -14,7 +14,7 @@ define(['entities/Vector', 'entities/Attractor', 'entities/Particle', 'helpers/M
 
     LetterPoint.prototype = {
         update: function(context) {
-            for(var i = 0; i < this.particlesNumber -1; i++) {
+            for(var i = 0; i < this.particlesNumber - 1; i++) {
                 this.particles[i].applyForce(this.attractor.attract(this.particles[i]));
                 this.drawLines(context, this.particles[i], this.particles[i+1], 15);
                 this.particles[i].update(context);

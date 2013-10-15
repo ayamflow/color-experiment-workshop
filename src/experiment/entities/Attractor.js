@@ -2,7 +2,7 @@ define(['entities/Vector'], function(Vector) {
     var Attractor = function(x, y) {
         this.position = new Vector(x, y);
         this.mass = 10;
-        this.gravityConstant = 0.1;
+        this.gravityConstant = 0.4;
     };
 
     Attractor.prototype = {
