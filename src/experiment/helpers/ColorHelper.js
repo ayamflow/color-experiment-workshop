@@ -39,6 +39,10 @@ define(['tinycolor'], function(tinycolor) {
             }
 
             return scale;
+        },
+
+        toRGBA: function(color, opacity) {
+            return tinycolor(color).toRgbString().replace('rgb', 'rgba').replace(')', ', ' + opacity + ')');
         }
     };
 });

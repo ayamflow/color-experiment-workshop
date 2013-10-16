@@ -1,9 +1,12 @@
-define(['entities/Vector'], function(Vector) {
+define(['entities/Vector', 'data/Colors', 'helpers/ColorHelper'], function(Vector, Colors, ColorHelper) {
     var Particle = function(x, y) {
         this.position = new Vector(x, y);
         this.velocity = new Vector();
         this.acceleration = new Vector();
         this.mass = 10;
+
+        this.fillStyle = Colors.PURPLE;
+        this.opacity = 0;
     };
 
     Particle.prototype = {
@@ -20,10 +23,10 @@ define(['entities/Vector'], function(Vector) {
         },
 
         draw: function(context) {
-            context.fillStyle = '#880066';
             // context.moveTo(this.position.x, this.position.y);
             // context.arc(this.position.x, this.position.y, 1, 0, 2 * Math.PI, true);
             // context.fill();
+            context.fillStyle = ColorHelper.toRGBA(this.fillStyle, this.opacity);
             context.fillRect(this.position.x, this.position.y, 1, 1);
         }
     };

@@ -18,7 +18,7 @@ define(['entities/Vector'], function(Vector) {
         },
 
         repel: function(particle) {
-            return this.attract(particle, -2);
+            return this.attract(particle, -1);
         },
 
         draw: function(context) {

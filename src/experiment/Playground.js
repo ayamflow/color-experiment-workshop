@@ -1,4 +1,4 @@
-define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Letter', 'entities/Attractor', 'entities/Particle', 'Stats', 'dat', 'entities/Triangle', 'helpers/ColorHelper'], function(Resize, Mouse, MathHelper, Letter, Attractor, Particle, Stats, dat, Triangle, ColorHelper) {
+define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Letter', 'entities/Attractor', 'entities/Particle', 'Stats', 'dat', 'helpers/ColorHelper', 'data/GlobalSignals', 'data/GuiConstants'], function(Resize, Mouse, MathHelper, Letter, Attractor, Particle, Stats, dat, ColorHelper, GlobalSignals, GuiConstants) {
 
     var Playground = function()
     {
@@ -18,7 +18,7 @@ define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Lette
         init: function()
         {
             // Mouse init
-            this.mouse = new Mouse(Resize.screenWidth, Resize.screenHeight);
+            this.mouse = Mouse;//new Mouse(Resize.screenWidth, Resize.screenHeight);
 
             // Renderer init
             this.canvas = document.createElement('canvas');
@@ -31,45 +31,92 @@ define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Lette
 
             // Variables
             this.words = ["purple", "means", "disorder"];
+            this.letterWidth = this.letterHeight = 90;
+            this.letterSpacing = 80;
             this.wordIndex = 0;
             this.letterGroups = [];
-            this.onExploded();
+            this.showNextWord();
+
+            // this.particles = [];
+            // this.particlesNumber = 200;
+
+            // this.fluid = new Fluid(Resize.screenWidth, Resize.screenHeight, 5000);
 
 
-            this.particles = [];
-            this.particlesNumber = 200;
+            GlobalSignals.trianglesAppeared.addOnce(this.showText.bind(this));
 
             window.addEventListener('resize', this.onResize.bind(this));
+        },
+
+        showText: function() {
+            this.wordsTl.play();
         },
 
         createWord: function(word) {
             var splitWord = word.split('');
             var letters = [];
-            var startX = Resize.halfScreenWidth - (splitWord.length * 100) / 2;
-            var startY = Resize.halfScreenHeight - 70;
+            var startX = Resize.halfScreenWidth - (splitWord.length * (this.letterWidth + this.letterSpacing)) / 2;
+            var startY = Resize.halfScreenHeight - this.letterHeight;
+            this.wordsTl = new TimelineMax({onComplete: this.onWordsTlComplete.bind(this)});
             for(var i = 0; i < splitWord.length; i++) {
-                letters[i] = new Letter(splitWord[i], i * 100 + startX, startY, 70, 70, 50);
+                letters[i] = new Letter(splitWord[i], i * (this.letterWidth + this.letterSpacing) + startX, startY, this.letterWidth, this.letterHeight, i);
+                this.wordsTl.insert(TweenMax.to(letters[i], 2, {opacity: 1, ease: Cubic.easeInOut}), 0.55 * i);
+                // this.wordsTl.insert(TweenMax.to(letters[i], 2, {strokeWidth: 3, ease: Cubic.easeInOut}), 0.55 * i);
             }
-            letters[0].explodedSignal.add(this.onExploded.bind(this));
+            this.wordsTl.gotoAndStop(0);
+            console.log(letters[0]);
 
             return letters;
         },
 
-        onExploded: function() {
-            console.log('[onExploded]', this.wordIndex + "/" + this.words.length);
+        onWordsTlComplete: function() {
+            console.log('fadeIn Complete');
+            var word = this.words[++this.wordIndex];
+            var splitWord = word.split('');
+
+            var startX = Resize.halfScreenWidth - (splitWord.length * (this.letterWidth + this.letterSpacing)) / 2;
+            var startY = Resize.halfScreenHeight - this.letterHeight;
+
+            console.log('MORPHING', this.letterGroups[0].length, splitWord.length);
+            for(var i = 0; i < this.letterGroups[0].length; i++) {
+                if(i < splitWord.length) {
+                    this.letterGroups[0][i].morph(word[i], startX + i * (this.letterWidth + this.letterSpacing), startY);
+                }
+            }
+
+            if(this.letterGroups[0].length < splitWord.length) {
+                var diff = splitWord.length - this.letterGroups[0].length;
+                for(i = this.letterGroups[0].length; i < splitWord.length; i++) {
+                    this.letterGroups[0][i] = new Letter(splitWord[i], i * (this.letterWidth + this.letterSpacing) + startX, startY, this.letterWidth, this.letterHeight, i);
+                }
+            }
+            else if(this.letterGroups[0].length > splitWord.length) {
+                for(i = this.letterGroups[0].length; i < splitWord.length; i++) {
+                    TweenMax.to(this.letterGroups[0][i], 1, {opacity: 0, ease: Cubic.easeInOut, delay: i * 0.2});
+                }
+            }
+
+            // Morph existing letter
+            // Create missing
+            // Hide not used anymore
+        },
+
+        showNextWord: function() {
             if(this.wordIndex >= this.words.length) return;
+            console.log('[showNextWord]', this.wordIndex + 1 + "/" + this.words.length);
             if(this.letterGroups[this.wordIndex]) {
                 this.letterGroups[this.wordIndex][0].explodedSignal.removeAll();
                 this.letterGroups[this.wordIndex].length = 0;
             }
-            this.letterGroups.push(this.createWord(this.words[this.wordIndex]));
-            this.letterGroups[this.wordIndex++][0].explodedSignal.add(this.onExploded.bind(this));
+            this.letterGroups.push(this.createWord(this.words[this.wordIndex], 90, 90, 50));
         },
 
         onResize: function() {
             // Update size singleton
             Resize.onResize();
 
+            this.canvas.width = Resize.screenWidth;
+            this.canvas.height = Resize.screenHeight;
         },
 
         animate: function()
@@ -83,20 +130,10 @@ define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Lette
             }
 
             // EXPERIMENT LOGIC
-            // this.letters.drawBatch("abf", this.context, Resize.halfScreenWidth, Resize.halfScreenHeight);
             for(var i = 0; i < this.letterGroups.length; i++) {
                 for(var j = 0; j < this.letterGroups[i].length; j++) {
                     this.letterGroups[i][j].draw(this.context, Resize.halfScreenWidth, Resize.halfScreenHeight);
                 }
-                /*if(this.enableRepel) {
-                    if(dist <= 100) {
-                        for(var j = 0; j < this.letters[i].points.length; j++) {
-                            for(var k = 0; k < this.letters[i].points[j].particles.length; k++) {
-                                this.letters[i].points[j].particles[k].applyForce(this.repeller.attract(this.letters[i].points[j].particles[k]));
-                            }
-                        }
-                    }
-                }*/
             }
 
             requestAnimationFrame(this.animate.bind(this));
@@ -104,6 +141,7 @@ define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Lette
 
         createGUI: function() {
             this.gui = new dat.GUI();
+            this.gui.add(GuiConstants, 'debug');
         },
 
         debug: function() {
