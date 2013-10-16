@@ -22,6 +22,7 @@ define(['entities/Vector', 'entities/Attractor', 'entities/Particle', 'helpers/M
         this.attractor = new Attractor(x, y);
         this.attractor.mass = 1;
 
+        if(GuiConstants.debug) pointsTl.timeScale = GuiConstants.timeScale;
         // pointsTl.gotoAndStop(0);
         pointsTl.play();
 

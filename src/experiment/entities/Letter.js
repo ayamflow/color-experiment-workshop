@@ -1,4 +1,4 @@
-define(['data/Letters', 'entities/Vector', 'entities/LetterPoint', 'helpers/MathHelper', 'helpers/ColorHelper', 'tinycolor', 'entities/Attractor', 'data/Colors', 'TweenMax', 'data/GlobalSignals'], function(Letters, Vector, LetterPoint, MathHelper, ColorHelper, tinycolor, Attractor, Colors, greensock, GlobalSignals) {
+define(['data/Letters', 'entities/Vector', 'entities/LetterPoint', 'helpers/MathHelper', 'helpers/ColorHelper', 'tinycolor', 'entities/Attractor', 'data/Colors', 'TweenMax', 'data/GlobalSignals', 'data/GuiConstants'], function(Letters, Vector, LetterPoint, MathHelper, ColorHelper, tinycolor, Attractor, Colors, greensock, GlobalSignals, GuiConstants) {
     var Letter = function(letter, x, y, width, height, id) {
         this.width = width;
         this.height = height;
@@ -30,9 +30,10 @@ define(['data/Letters', 'entities/Vector', 'entities/LetterPoint', 'helpers/Math
         for(var i = 0; i < this.letter.length; i++) {
             this.letterPoints.push(new LetterPoint(x + this.width * this.letter[i].x, y + this.height * this.letter[i].y, 5, i));
 
-            this.triangulateTl.insert(TweenMax.to(this.letterPoints[i], 4, {opacity: 1, ease: Cubic.easeInOut}), this.id * 0.15 + i * 0.15);
+            this.triangulateTl.insert(TweenMax.to(this.letterPoints[i], 1.5, {opacity: 1, ease: Cubic.easeInOut}), this.id * 0.15 + i * 0.15);
         }
 
+        if(GuiConstants.debug) this.triangulateTl.timeScale = GuiConstants.timeScale;
         this.triangulateTl.gotoAndStop(0);
         // this.triangulateTl.play();
     };
@@ -46,7 +47,7 @@ define(['data/Letters', 'entities/Vector', 'entities/LetterPoint', 'helpers/Math
         morph: function(letter, newX, newY) {
             this.triangulateTl.clear();
             var oldLength = this.letter.length;
-            console.log('old letter:', this.letterSign, 'nex letter:', letter);
+            console.log('old letter:', this.letterSign, 'new letter:', letter);
             this.letter = Letters[letter];
             this.letterSign = letter;
 
@@ -60,7 +61,7 @@ define(['data/Letters', 'entities/Vector', 'entities/LetterPoint', 'helpers/Math
 
 
             if(oldLength > this.letter.length) { // Hide some point
-                console.log('old word was longer');
+                console.log('old letter was longer');
                 for(i = oldLength - 1; i < this.letter.letter; i++) {
                     TweenMax.to(this.letter[i], 1, {opacity: 0, ease: Cubic.easeInOut, onComplete: function() {
                             console.log('completed hiding extra letters');
@@ -95,7 +96,7 @@ define(['data/Letters', 'entities/Vector', 'entities/LetterPoint', 'helpers/Math
                 this.letterPoints[i].update(context);
                 context.globalCompositeOperation = "lighter";
                 if(i < this.letterPoints.length - 1) {
-                    this.drawLines(context, this.letterPoints[i], this.letterPoints[i+1], this.width * 1.4);
+                    this.drawLines(context, this.letterPoints[i], this.letterPoints[i+1], 150);
                 }
                 context.globalCompositeOperation = "source-over"; // reset compositing
             }

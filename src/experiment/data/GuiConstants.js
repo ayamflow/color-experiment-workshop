@@ -1,6 +1,7 @@
 define(function() {
     var guiConstants = {
-        debug: true
+        debug: true,
+        timeScale: 10
         // showLetterPoints: false
     };
 
