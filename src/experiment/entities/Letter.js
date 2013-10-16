@@ -64,7 +64,7 @@ define(['data/Letters', 'entities/Vector', 'entities/LetterPoint', 'entities/Mov
                 if(this.attractor !== undefined) {
                     // this.attractor.draw(context);
                     for(var j = 0; j < this.points[i].particles.length; j++) {
-                        this.points[i].particles[j].applyForce(this.attractor.attract(this.points[i].particles[j], 1));
+                        this.points[i].particles[j].applyForce(this.attractor.attract(this.points[i].particles[j], -1));
                     }
                 }
 
@@ -87,7 +87,7 @@ define(['data/Letters', 'entities/Vector', 'entities/LetterPoint', 'entities/Mov
             }
             else if(this.attractor === undefined) {
                 this.attractor = new Attractor(this.position.x + this.width, this.position.y + this.height);
-                this.attractor.mass = 100;
+                this.attractor.mass = 60;
                 setTimeout(function() {
                     this.explodedSignal.dispatch();
                 }.bind(this), 1200);
