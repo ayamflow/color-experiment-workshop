@@ -11,6 +11,7 @@ define(['data/Letters', 'entities/Vector', 'entities/LetterPoint', 'helpers/Math
         this.lineColor = Colors.PURPLE;
         this.strokeWidth = 1;
         this.opacity = 0;
+        this.threshold = this.width > this.height ? this.width * 0.6 : this.height * 0.6;
 
         this.position = new Vector(x, y);
 
@@ -43,22 +44,26 @@ define(['data/Letters', 'entities/Vector', 'entities/LetterPoint', 'helpers/Math
     };
 
     Letter.prototype = {
-
         onLetterWidthChanged: function() {
             this.width = GuiConstants.letterWidth;
+            this.threshold = this.width > this.height ? this.width * 0.6 : this.height * 0.6;
 
             for(var i = 0; i < this.letterPoints.length; i++){
                 this.letterPoints[i].position.x = this.position.x + this.width * this.letter[i].x;
+                for(var j = 0; j < this.letterPoints[i].particles.length; j++) {
+                    this.letterPoints[i].particles[j].position.x = this.letterPoints[i].position.x;
+                }
             }
         },
 
         onLetterHeightChanged: function() {
             this.height = GuiConstants.letterHeight;
+            this.threshold = this.width > this.height ? this.width * 0.6 : this.height * 0.6;
 
             for(var i = 0; i < this.letterPoints.length; i++){
-                for(var j = 0; i < this.letterPoints[i].particlesNumber; i++) {
-                    x = this.position.x + this.width * this.letter[i].x;
-                    this.letterPoints[i].particles[j].position.y = MathHelper.rand(this.position.y + this.height + this.letter[i].y - this.letterPoints[i].particleDistance, y + this.letterPoints[i].particleDistance);
+                this.letterPoints[i].position.y = this.position.y + this.height * this.letter[i].y;
+                for(var j = 0; j < this.letterPoints[i].particles.length; j++) {
+                    this.letterPoints[i].particles[j].position.y = this.letterPoints[i].position.y;
                 }
             }
         },
@@ -66,6 +71,7 @@ define(['data/Letters', 'entities/Vector', 'entities/LetterPoint', 'helpers/Math
         determineShowingTriangles: function() {
             var showingNumber = this.letterPoints.length >> 1,
             index;
+            console.log('[determineShowingTriangles]', showingNumber);
             for(i = 0; i < showingNumber; i++) {
                 index = ~~(Math.random() * (this.letterPoints.length - 2));
                 this.letterPoints[index].showing = true;
@@ -77,20 +83,23 @@ define(['data/Letters', 'entities/Vector', 'entities/LetterPoint', 'helpers/Math
         },
 
         morph: function(letter, newX, newY) {
+            // console.log('[morph]', letter, newX, newY);
+
             this.triangulateTl.clear();
             var oldLength = this.letter.length;
             // console.log('old letter:', this.letterSign, 'new letter:', letter);
             this.letter = Letters[letter];
             this.letterSign = letter;
 
-            // GlobalSignals.particlesAppeared.removeAll();
-            // GlobalSignals.particlesAppeared.addOnce(this.playTl.bind(this));
+            GlobalSignals.particlesAppeared.removeAll();
+            GlobalSignals.particlesAppeared.addOnce(this.playTl.bind(this));
 
             this.position.x = newX;
             this.position.y = newY;
 
             this.removeUselessPoints(oldLength);
             this.addMissingPoints(oldLength, 5);
+
             // this.determineShowingTriangles();
 
             this.translatePoints();

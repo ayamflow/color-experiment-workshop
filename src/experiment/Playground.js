@@ -78,6 +78,8 @@ define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Lette
             // Speed up things a bit in debug mode
             if(GuiConstants.debug) this.wordsTl.timeScale(GuiConstants.timeScale);
             this.wordsTl.gotoAndStop(0);
+
+            GlobalSignals.experimentStarted.dispatch();
         },
 
         changeWord: function() {
@@ -96,16 +98,15 @@ define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Lette
             var startX = Resize.halfScreenWidth - (splitWord.length * (GuiConstants.letterWidth + GuiConstants.letterSpacing)) / 2;
             var startY = Resize.halfScreenHeight - GuiConstants.letterHeight;
 
-            // setTimeout(function() {
-                this.removeUnusedLetters(splitWord);
-                this.addMissingLetters(startX, startY, splitWord);
+            this.removeUnusedLetters(splitWord);
+            this.addMissingLetters(startX, startY, splitWord);
 
-                this.morphCurrentWord(startX, startY, word);
-                this.addEvents();
-            // }.bind(this), 2500);// / GuiConstants.timeScale);
+            this.morphCurrentWord(startX, startY, word);
+            this.addEvents();
         },
 
         morphCurrentWord: function(x, y, word) {
+            // console.log('[morphCurrentWord] Letters to morph:', word, word.length);
             for(var i = 0; i < word.length; i++) {
                 this.letterGroup[i].morph(word[i], x + i * (GuiConstants.letterWidth + GuiConstants.letterSpacing), y);
             }
@@ -131,7 +132,7 @@ define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Lette
         },
 
         addLetter: function(letter, index, x, y) {
-            // console.log('[addLetter]', index, x, y);
+            console.log('[addLetter]', index, x, y);
             return new Letter(letter, x, y, GuiConstants.letterWidth, GuiConstants.letterHeight, index);
         },
 
@@ -205,7 +206,6 @@ define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Lette
             var mass = attractors.add(GuiConstants, 'mass').min(0).max(120);
             var grav = attractors.add(GuiConstants, 'gravityConstant').min(0).max(100);
 
-            mass.listen();
             mass.onChange(function() {
                 for(var i = 0; i < this.letterGroup.length; i++) {
                     for(var j = 0; j < this.letterGroup[i].letterPoints.length; j++) {

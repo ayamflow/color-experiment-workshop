@@ -18,6 +18,10 @@ define(['entities/Vector', 'entities/Attractor', 'entities/Particle', 'helpers/M
             }
         });
 
+        GlobalSignals.experimentStarted.add(function() {
+            pointsTl.play();
+        });
+
         this.showing = false;
 
         // Particles init
@@ -31,8 +35,8 @@ define(['entities/Vector', 'entities/Attractor', 'entities/Particle', 'helpers/M
         this.attractor.mass = 1;
 
         if(GuiConstants.debug) pointsTl.timeScale(GuiConstants.timeScale);
-        // pointsTl.gotoAndStop(0);
-        pointsTl.play();
+        pointsTl.gotoAndStop(0);
+        // pointsTl.play();
     };
 
     LetterPoint.prototype = {
@@ -41,11 +45,11 @@ define(['entities/Vector', 'entities/Attractor', 'entities/Particle', 'helpers/M
 
                 if(this.morphing) {
                     // this.particles[i].position = this.position.clone();
-                    var position = this.position.clone();
-                    this.particles[i].position.x = position.x + 30 * Math.cos(this.angles[i]);
-                    this.particles[i].position.y = position.y + 30 * Math.sin(this.angles[i]);
-                    this.attractor.position = position;
-                    this.angle += 0.03;
+                    // var position = this.position.clone();
+                    // this.particles[i].position.x = position.x + 30 * Math.cos(this.angles[i]);
+                    // this.particles[i].position.y = position.y + 30 * Math.sin(this.angles[i]);
+                    // this.attractor.position = position;
+                    this.smoothMoveParticle(this.particles[i]);
                 }
                 else {
                     this.particles[i].applyForce(this.attractor.attract(this.particles[i]));
@@ -57,9 +61,17 @@ define(['entities/Vector', 'entities/Attractor', 'entities/Particle', 'helpers/M
                 }
                 this.particles[i].update(context);
             }
+            this.angle += 0.03;
 
             if(GuiConstants.debug) this.draw(context);
             // this.attractor.draw(context);
+        },
+
+        smoothMoveParticle: function(particle, i) {
+            var position = this.position.clone();
+            particle.position.x = position.x + 30 * Math.cos(this.angles[i]);
+            particle.position.y = position.y + 30 * Math.sin(this.angles[i]);
+            this.attractor.position = position;
         },
 
         draw: function(context) {
