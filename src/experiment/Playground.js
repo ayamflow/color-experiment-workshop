@@ -31,88 +31,116 @@ define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Lette
 
             // Variables
             this.words = ["purple", "means", "disorder"];
-            this.letterWidth = this.letterHeight = 90;
-            this.letterSpacing = 80;
+            GuiConstants.letterWidth = GuiConstants.letterHeight = 90;
+            GuiConstants.letterSpacing = 60;
             this.wordIndex = 0;
             this.letterGroup = [];
 
-            // Create & animate the first word
-            this.createWord(this.words[this.wordIndex], 90, 90, 50);
+            // Map signal of letter morph completion
+            this.addEvents();
 
-            GlobalSignals.trianglesAppeared.addOnce(this.showText.bind(this));
+            // Kick it
+            this.createWord(this.words[this.wordIndex]);
 
             window.addEventListener('resize', this.onResize.bind(this));
         },
 
-
-        createWord: function(word) {
-            var splitWord = word.split('');
-            var startX = Resize.halfScreenWidth - (splitWord.length * (this.letterWidth + this.letterSpacing)) / 2;
-            var startY = Resize.halfScreenHeight - this.letterHeight;
-            this.wordsTl = new TimelineMax({onComplete: this.onWordsTlComplete.bind(this)});
-
-
-            for(var i = 0; i < splitWord.length; i++) {
-                this.letterGroup[i] = this.addLetter(splitWord[i], i, i * (this.letterWidth + this.letterSpacing) + startX, startY);
-                // letters[i] = new Letter(splitWord[i], i * (this.letterWidth + this.letterSpacing) + startX, startY, this.letterWidth, this.letterHeight, i);
-                this.wordsTl.insert(TweenMax.to(this.letterGroup[i], 2, {opacity: 1, ease: Cubic.easeInOut}), 0.55 * i);
-                // this.wordsTl.insert(TweenMax.to(letters[i], 2, {strokeWidth: 3, ease: Cubic.easeInOut}), 0.55 * i);
-                console.log(this.letterGroup[i]);
-            }
-            // Speed up things for debug
-            if(GuiConstants.debug) this.wordsTl.timeScale = GuiConstants.timeScale;
-            this.wordsTl.gotoAndStop(0);
+        resetEvents: function() {
+            GlobalSignals.morphingCompleted.removeAll();
+            GlobalSignals.trianglesAppeared.removeAll();
+            GlobalSignals.textTransformCompleted.removeAll();
         },
 
-        addLetter: function(letter, index, x, y) {
-            return new Letter(letter, x, y, this.letterWidth, this.letterHeight, index);
-        },
+        addEvents: function() {
+            // Listen for word change
+            GlobalSignals.morphingCompleted.addOnce(this.changeWord.bind(this));
+            GlobalSignals.trianglesAppeared.addOnce(this.showText.bind(this));
 
-        removeLetter: function(index) {
-            TweenMax.to(this.letterGroup[index], 1, {opacity: 0, ease: Expo.easeInOut, onComplete: function() {
-                    this.letterGroup.splice(index, 1);
-                }
-            });
+            // Listen for word changing done
+            GlobalSignals.textTransformCompleted.addOnce(this.explodeText.bind(this));
         },
 
         showText: function() {
             this.wordsTl.play();
         },
 
-        onWordsTlComplete: function() {
-            console.log('fadeIn Complete');
+        createWord: function(word) {
+            var splitWord = word.split('');
+            var startX = Resize.halfScreenWidth - (splitWord.length * (GuiConstants.letterWidth + GuiConstants.letterSpacing)) / 2;
+            var startY = Resize.halfScreenHeight - GuiConstants.letterHeight;
+            this.wordsTl = new TimelineMax({onComplete: this.changeWord.bind(this)});
+
+            for(var i = 0; i < splitWord.length; i++) {
+                this.letterGroup[i] = this.addLetter(splitWord[i], i, i * (GuiConstants.letterWidth + GuiConstants.letterSpacing) + startX, startY);
+                this.wordsTl.insert(TweenMax.to(this.letterGroup[i], 2, {opacity: 1, ease: Cubic.easeInOut}), 0.55 * i);
+            }
+
+            // Speed up things a bit in debug mode
+            if(GuiConstants.debug) this.wordsTl.timeScale(GuiConstants.timeScale);
+            this.wordsTl.gotoAndStop(0);
+        },
+
+        changeWord: function() {
+            this.resetEvents();
+
+            if(this.wordIndex >= this.words.length - 1) {
+                console.log('YENAPU');
+                return GlobalSignals.textTransformCompleted.dispatch();
+            }
+
+            // Fetch next word
             var word = this.words[++this.wordIndex];
             var splitWord = word.split('');
+            console.log('[changeWord]', word, this.wordIndex + 1 + "/" + this.words.length);
 
-            var startX = Resize.halfScreenWidth - (splitWord.length * (this.letterWidth + this.letterSpacing)) / 2;
-            var startY = Resize.halfScreenHeight - this.letterHeight;
+            var startX = Resize.halfScreenWidth - (splitWord.length * (GuiConstants.letterWidth + GuiConstants.letterSpacing)) / 2;
+            var startY = Resize.halfScreenHeight - GuiConstants.letterHeight;
 
-            console.log('MORPHING', word, this.letterGroup.length, splitWord.length);
-            for(var i = 0; i < this.letterGroup.length; i++) {
-                if(i < splitWord.length) {
-                    this.letterGroup[i].morph(word[i], startX + i * (this.letterWidth + this.letterSpacing), startY);
-                }
+            // setTimeout(function() {
+                this.removeUnusedLetters(splitWord);
+                this.addMissingLetters(startX, startY, splitWord);
+
+                this.morphCurrentWord(startX, startY, word);
+                this.addEvents();
+            // }.bind(this), 2500);// / GuiConstants.timeScale);
+        },
+
+        morphCurrentWord: function(x, y, word) {
+            for(var i = 0; i < word.length; i++) {
+                this.letterGroup[i].morph(word[i], x + i * (GuiConstants.letterWidth + GuiConstants.letterSpacing), y);
             }
+        },
 
-            if(this.letterGroup.length < splitWord.length) { // Need to create more letters
-                console.log('CREATING LETTER');
-                for(i = this.letterGroup.length; i < splitWord.length; i++) {
-                    console.log('create letter', splitWord[i]);
-                    this.letterGroup[i] = new Letter(splitWord[i], i * (this.letterWidth + this.letterSpacing) + startX, startY, this.letterWidth, this.letterHeight, i);
-                    this.letterGroup[i].opacity = 1;
-                }
+        addMissingLetters: function(x, y, newWord) {
+            for(i = this.letterGroup.length; i < newWord.length; i++) {
+                this.letterGroup[i] = new Letter(newWord[i], Resize.halfScreenWidth, Resize.halfScreenHeight, GuiConstants.letterWidth, GuiConstants.letterHeight, i);
+                TweenMax.from(this.letterGroup[i].position, 1, {x: this.letterGroup[i].position.x - 50, y: this.letterGroup[i].position.y - 50, ease: Cubic.easeInOut});
+                TweenMax.to(this.letterGroup[i], 1, {
+                    opacity: 1,
+                    x: i * (GuiConstants.letterWidth + GuiConstants.letterSpacing) + x,
+                    y: y,
+                    ease: Expo.easeInOut
+                });
             }
-            else if(this.letterGroup.length > splitWord.length) { // Need to hide some letters
-                console.log('HIDING LETTER');
-                for(i = this.letterGroup.length - 1; i < splitWord.length; i++) {
-                    console.log('hide letter', this.words[this.wordIndex - 1].split('')[i]);
-                    this.letterGroup[i].hide();
-                }
-            }
+        },
 
-            // Morph existing letter
-            // Create missing
-            // Hide not used anymore
+        removeUnusedLetters: function(newWord) {
+            for(i = newWord.length; i < this.letterGroup.length; i++) {
+                this.removeLetter(i);
+            }
+        },
+
+        addLetter: function(letter, index, x, y) {
+            // console.log('[addLetter]', index, x, y);
+            return new Letter(letter, x, y, GuiConstants.letterWidth, GuiConstants.letterHeight, index);
+        },
+
+        removeLetter: function(index) {
+            console.log('[removeLetter]', index);
+            TweenMax.to(this.letterGroup[index], 1, {opacity: 0, ease: Expo.easeInOut, onComplete: function() {
+                    this.letterGroup.splice(index, 1);
+                }.bind(this)
+            });
         },
 
         onResize: function() {
@@ -121,6 +149,15 @@ define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Lette
 
             this.canvas.width = Resize.screenWidth;
             this.canvas.height = Resize.screenHeight;
+        },
+
+        explodeText: function() {
+            console.log('[explodeText]');
+            this.resetEvents();
+            TweenMax.to(GuiConstants, 2.5, {mass: 100, ease: Cubic.easeInOut, onComplete: function() {
+                    GuiConstants.mass = 0;
+                }
+            });
         },
 
         animate: function()
@@ -135,9 +172,7 @@ define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Lette
 
             // EXPERIMENT LOGIC
             for(var i = 0; i < this.letterGroup.length; i++) {
-                for(var j = 0; j < this.letterGroup[i].length; j++) {
-                    this.letterGroup[i][j].draw(this.context, Resize.halfScreenWidth, Resize.halfScreenHeight);
-                }
+                this.letterGroup[i].draw(this.context, Resize.halfScreenWidth, Resize.halfScreenHeight);
             }
 
             requestAnimationFrame(this.animate.bind(this));
@@ -146,6 +181,48 @@ define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Lette
         createGUI: function() {
             this.gui = new dat.GUI();
             this.gui.add(GuiConstants, 'debug');
+
+            var letters = this.gui.addFolder("Letters");
+            var widthUpdate = letters.add(GuiConstants, 'letterWidth').min(10).max(200);
+            var heightUpdate = letters.add(GuiConstants, 'letterHeight').min(10).max(200);
+            var spacingUpdate = letters.add(GuiConstants, 'letterSpacing').min(10).max(200);
+
+            widthUpdate.onChange(function() {
+                GlobalSignals.letterWidthChanged.dispatch();
+            });
+
+            heightUpdate.onChange(function() {
+                GlobalSignals.letterHeightChanged.dispatch();
+            });
+
+            spacingUpdate.onChange(function() {
+                GlobalSignals.letterSpacingChanged.dispatch();
+            });
+
+            letters.open();
+
+            var attractors = this.gui.addFolder("Attractors");
+            var mass = attractors.add(GuiConstants, 'mass').min(0).max(120);
+            var grav = attractors.add(GuiConstants, 'gravityConstant').min(0).max(100);
+
+            mass.listen();
+            mass.onChange(function() {
+                for(var i = 0; i < this.letterGroup.length; i++) {
+                    for(var j = 0; j < this.letterGroup[i].letterPoints.length; j++) {
+                        this.letterGroup[i].letterPoints[j].attractor.mass = GuiConstants.mass;
+                    }
+                }
+            }.bind(this));
+
+            grav.onChange(function() {
+                for(var i = 0; i < this.letterGroup.length; i++) {
+                    for(var j = 0; j < this.letterGroup[i].letterPoints.length; j++) {
+                        this.letterGroup[i].letterPoints[j].attractor.gravityConstant = GuiConstants.gravityConstant;
+                    }
+                }
+            }.bind(this));
+
+            attractors.open();
         },
 
         debug: function() {

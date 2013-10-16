@@ -28,12 +28,11 @@ define(['entities/Vector'], function(Vector) {
             new Vector(1, 2)
         ],
         d: [
-            new Vector(1, 0),
-            new Vector(1, 1),
-            new Vector(1, 2),
-            new Vector(0, 2),
+            new Vector(0, 0),
             new Vector(0, 1),
+            new Vector(0, 2),
             new Vector(1, 1),
+            new Vector(0, 0)
         ],
         e: [
             new Vector(1, 0),

@@ -7,42 +7,54 @@ define(['entities/Vector', 'entities/Attractor', 'entities/Particle', 'helpers/M
         this.lineColor = Colors.WHITE;
         this.opacity = 0;
 
-        var particleDistance = 10;
+        this.morphing = false;
+        this.particleDistance = 10;
+        this.angles = [];
+
+        // Apparition timeline
         var pointsTl = new TimelineMax({onComplete: function() {
-                console.log('particlesAppeared');
+                // console.log('particlesAppeared');
                 GlobalSignals.particlesAppeared.dispatch();
             }
         });
 
+        this.showing = false;
+
+        // Particles init
         for(var i = 0; i < this.particlesNumber; i++) {
-            this.particles.push(new Particle(MathHelper.rand(x - particleDistance, x + particleDistance), MathHelper.rand(y - particleDistance, y + particleDistance)));
+            this.particles.push(new Particle(MathHelper.rand(x - this.particleDistance, x + this.particleDistance), MathHelper.rand(y - this.particleDistance, y + this.particleDistance)));
             pointsTl.insert(TweenMax.to(this.particles[i], 0.6, {opacity: 1, ease: Expo.easeInOut}), id * 0.5 + i * 0.6);
+            this.angles.push(Math.random());
         }
 
         this.attractor = new Attractor(x, y);
         this.attractor.mass = 1;
 
-        if(GuiConstants.debug) pointsTl.timeScale = GuiConstants.timeScale;
+        if(GuiConstants.debug) pointsTl.timeScale(GuiConstants.timeScale);
         // pointsTl.gotoAndStop(0);
         pointsTl.play();
-
-        // TweenMax.to(this, 2.4, {opacity: 1, ease: Cubic.easeInOut, delay: 1});
     };
 
     LetterPoint.prototype = {
         update: function(context) {
-            this.attractor.position.x = this.position.x;
-            this.attractor.position.y = this.position.y;
+            for(var i = 0; i < this.particlesNumber; i++) {
 
-            for(var i = 0; i < this.particlesNumber - 1; i++) {
-
-                // if(GuiConstants.debug) {
-                    this.particles[i].position = this.position;
-                // }
-                // else {
-                    // this.particles[i].applyForce(this.attractor.attract(this.particles[i]));
-                // }
-                this.drawLines(context, this.particles[i], this.particles[i+1], 15);
+                if(this.morphing) {
+                    // this.particles[i].position = this.position.clone();
+                    var position = this.position.clone();
+                    this.particles[i].position.x = position.x + 30 * Math.cos(this.angles[i]);
+                    this.particles[i].position.y = position.y + 30 * Math.sin(this.angles[i]);
+                    this.attractor.position = position;
+                    this.angle += 0.03;
+                }
+                else {
+                    this.particles[i].applyForce(this.attractor.attract(this.particles[i]));
+                }
+                if(i < this.particlesNumber - 1) {
+                    if(this.showing) {
+                        this.drawLines(context, this.particles[i], this.particles[i+1], 15);
+                    }
+                }
                 this.particles[i].update(context);
             }
 
@@ -51,9 +63,14 @@ define(['entities/Vector', 'entities/Attractor', 'entities/Particle', 'helpers/M
         },
 
         draw: function(context) {
-            context.fillStyle = "rgba(120, 120, 255, 0.4)";
+            context.fillStyle = "rgba(120, 120, 255, 0.2)";
             context.arc(this.position.x, this.position.y, 10, 0, 2 * Math.PI, true);
             context.fill();
+        },
+
+        dispose: function() {
+            console.log("removing this");
+            this.lineColor = "#FF0F0F";
         },
 
         drawLines: function(context, p1, p2, threshold) {
