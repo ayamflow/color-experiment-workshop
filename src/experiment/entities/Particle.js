@@ -27,7 +27,7 @@ define(['entities/Vector', 'data/Colors', 'helpers/ColorHelper'], function(Vecto
             // context.arc(this.position.x, this.position.y, 1, 0, 2 * Math.PI, true);
             // context.fill();
             context.fillStyle = ColorHelper.toRGBA(this.fillStyle, this.opacity);
-            context.fillRect(this.position.x, this.position.y, 1, 1);
+            context.fillRect(this.position.x, this.position.y, 2, 2);
         }
     };
 

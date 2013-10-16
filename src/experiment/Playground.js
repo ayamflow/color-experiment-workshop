@@ -30,7 +30,9 @@ define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Lette
             Resize.enableSmoothing(false);
 
             // Variables
+            // this.words = ["purple", "stands", "for", "disorder"];
             this.words = ["purple", "means", "disorder"];
+            // this.words = ["coucou", "tete", "de", "bite"];
             GuiConstants.letterWidth = GuiConstants.letterHeight = 90;
             GuiConstants.letterSpacing = 60;
             this.wordIndex = 0;
@@ -84,9 +86,12 @@ define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Lette
 
         changeWord: function() {
             this.resetEvents();
+            console.log(this.letterGroup[3]);
+            console.log(this.letterGroup[4]);
 
             if(this.wordIndex >= this.words.length - 1) {
                 console.log('YENAPU');
+                console.log("Chelou:", this.letterGroup[3]);
                 return GlobalSignals.textTransformCompleted.dispatch();
             }
 
@@ -98,11 +103,14 @@ define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Lette
             var startX = Resize.halfScreenWidth - (splitWord.length * (GuiConstants.letterWidth + GuiConstants.letterSpacing)) / 2;
             var startY = Resize.halfScreenHeight - GuiConstants.letterHeight;
 
-            this.removeUnusedLetters(splitWord);
-            this.addMissingLetters(startX, startY, splitWord);
+            var timer = GuiConstants.debug ? 1500 / GuiConstants.timeScale : 1500;
+            setTimeout(function() {
+                this.removeUnusedLetters(splitWord);
+                this.addMissingLetters(startX, startY, splitWord);
 
-            this.morphCurrentWord(startX, startY, word);
-            this.addEvents();
+                this.morphCurrentWord(startX, startY, word);
+                this.addEvents();
+            }.bind(this), timer);
         },
 
         morphCurrentWord: function(x, y, word) {
@@ -118,8 +126,7 @@ define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Lette
                 TweenMax.from(this.letterGroup[i].position, 1, {x: this.letterGroup[i].position.x - 50, y: this.letterGroup[i].position.y - 50, ease: Cubic.easeInOut});
                 TweenMax.to(this.letterGroup[i], 1, {
                     opacity: 1,
-                    x: i * (GuiConstants.letterWidth + GuiConstants.letterSpacing) + x,
-                    y: y,
+                    delay: i * 0.04,
                     ease: Expo.easeInOut
                 });
             }
@@ -132,13 +139,13 @@ define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Lette
         },
 
         addLetter: function(letter, index, x, y) {
-            console.log('[addLetter]', index, x, y);
+            // console.log('[addLetter]', index, x, y);
             return new Letter(letter, x, y, GuiConstants.letterWidth, GuiConstants.letterHeight, index);
         },
 
         removeLetter: function(index) {
-            console.log('[removeLetter]', index);
-            TweenMax.to(this.letterGroup[index], 1, {opacity: 0, ease: Expo.easeInOut, onComplete: function() {
+            // console.log('[removeLetter]', index);
+            TweenMax.to(this.letterGroup[index], 0.5, {opacity: 0, ease: Expo.easeInOut, onComplete: function() {
                     this.letterGroup.splice(index, 1);
                 }.bind(this)
             });
@@ -182,6 +189,7 @@ define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Lette
         createGUI: function() {
             this.gui = new dat.GUI();
             this.gui.add(GuiConstants, 'debug');
+            this.gui.add(GuiConstants, 'drawAttractor');
 
             var letters = this.gui.addFolder("Letters");
             var widthUpdate = letters.add(GuiConstants, 'letterWidth').min(10).max(200);
