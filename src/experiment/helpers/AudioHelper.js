@@ -33,9 +33,15 @@ define(['helpers/BufferLoader'], function(BufferLoader) {
             source.start(0);
         },
 
-        createOscillator: function() {
+        createOscillator: function(frequency, volume) {
             var oscillator = this.context.createOscillator();
-            oscillator.frequency.value = 250;
+
+            var oscillatorGain = this.context.createGain();
+            oscillatorGain.connect(this.context.destination);
+            oscillatorGain.gain.value = volume || 1;
+
+            oscillator.frequency.value = frequency;
+            oscillator.type = 0;
             oscillator.connect(this.context.destination);
             // oscillator.start(0);
             oscillator.noteOn && oscillator.noteOn(0);

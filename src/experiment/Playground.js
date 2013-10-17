@@ -299,9 +299,16 @@ define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Lette
             TweenMax.to(this.canvas, 1, {opacity: 0, ease: Cubic.easeInOut, onComplete: function() {
                     cancelAnimationFrame(this.animationId);
                     Howler.Howler.mute();
+                    this.playGlitchNoise();
+                    this.playGlitchNoise();
+                    this.playGlitchNoise();
+                    this.playGlitchNoise();
                     this.bip.noteOff && this.bip.noteOff(0);
+                    this.bip2.noteOff && this.bip2.noteOff(0);
                     this.bip.frequency.value = 0;
+                    this.bip2.frequency.value = 0;
                     this.bip.disconnect();
+                    this.bip2.disconnect();
                 }.bind(this)
             });
             // TweenMax.to(this, 1, {glitchInterval: 120});
@@ -327,7 +334,8 @@ define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Lette
         endAnimation: function() {
             // console.log('[endAnimation]');
             this.ambiant.fadeOut(0, 1500);
-            this.bip = this.audio.createOscillator();
+            this.bip = this.audio.createOscillator(300, 0.5);
+            this.bip2 = this.audio.createOscillator(200, 0.2);
             // this.glitchInterval = 35;
             setTimeout(function() {
                 this.trails = true;
