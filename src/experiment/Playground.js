@@ -2,14 +2,6 @@ define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Lette
 
     var Playground = function()
     {
-        this.isDebug = true;
-        if(this.isDebug)
-        {
-            this.debug();
-        }
-        this.trails = false;
-        this.animationId = 0;
-
         // Kick it !
         this.init();
         // this.createGUI();
@@ -20,6 +12,14 @@ define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Lette
     Playground.prototype = {
         init: function()
         {
+            this.isDebug = true;
+            if(this.isDebug)
+            {
+                this.debug();
+            }
+            this.trails = false;
+            this.animationId = 0;
+
             // Mouse init
             this.mouse = Mouse;//new Mouse(Resize.screenWidth, Resize.screenHeight);
 
@@ -146,7 +146,7 @@ define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Lette
             // Fetch next word
             var word = this.words[++this.wordIndex];
             var splitWord = word.split('');
-            console.log('[changeWord]', word, this.wordIndex + 1 + "/" + this.words.length);
+            // console.log('[changeWord]', word, this.wordIndex + 1 + "/" + this.words.length);
 
             var startX = Resize.halfScreenWidth - (splitWord.length * (GuiConstants.letterWidth + GuiConstants.letterSpacing)) / 2;
             var startY = Resize.halfScreenHeight - GuiConstants.letterHeight;
@@ -224,7 +224,7 @@ define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Lette
         },
 
         explodeText: function() {
-            console.log('[explodeText]', GuiConstants.mass);
+            // console.log('[explodeText]', GuiConstants.mass);
             this.resetEvents();
 
             // var explodeTl = new TimelineMax({onUpdate: this.updateAttractorsMass.bind(this), onComplete: this.createFluid.bind(this)});
@@ -298,11 +298,10 @@ define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Lette
         stopGlitch: function() {
             TweenMax.to(this.canvas, 1, {opacity: 0, ease: Cubic.easeInOut, onComplete: function() {
                     cancelAnimationFrame(this.animationId);
-                    Howler.mute();
+                    Howler.Howler.mute();
                     this.bip.noteOff && this.bip.noteOff(0);
                     this.bip.frequency.value = 0;
                     this.bip.disconnect();
-                    this.bip = null;
                 }.bind(this)
             });
             // TweenMax.to(this, 1, {glitchInterval: 120});
@@ -326,10 +325,9 @@ define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Lette
         },
 
         endAnimation: function() {
-            console.log('[endAnimation]');
+            // console.log('[endAnimation]');
             this.ambiant.fadeOut(0, 1500);
             this.bip = this.audio.createOscillator();
-            console.log('this.bip', this.bip);
             // this.glitchInterval = 35;
             setTimeout(function() {
                 this.trails = true;
