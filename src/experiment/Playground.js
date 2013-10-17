@@ -2,29 +2,75 @@ define(['helpers/Resize', 'helpers/MathHelper', 'entities/Letter', 'entities/Att
 
     var Playground = function()
     {
-        // Kick it !
-        this.init();
-        // this.debug();
-        // this.createGUI();
-        this.loadSong();
-        this.animate();
+        // Renderer init
+        this.canvas = document.createElement('canvas');
+        this.canvas.width = Resize.screenWidth;
+        this.canvas.height = Resize.screenHeight;
+        this.canvas.id = "world";
+        this.context = this.canvas.getContext('2d');
+        document.body.appendChild(this.canvas);
+        Resize.enableSmoothing(false);
+
+        this.drawScalines();
+
+        this.centerButton();
+        var startButton = document.querySelector('#start p');
+        TweenMax.to(startButton, 0.3, {opacity: 1, onComplete: function() {
+                TweenMax.to(updater, 1, {run: 1, repeat: -1, onUpdate: function () {
+                        TweenMax.to(startButton, 0, {opacity: 0.5 + Math.random() * 0.5});
+                    }
+                });
+            }
+        });
+        var updater = {run: 0};
+        startButton.addEventListener('click', this.onStartClicked.bind(this));
     };
 
     Playground.prototype = {
+        centerButton: function() {
+            var div = document.querySelector('#start');
+            TweenMax.to(div, 0.4, {marginTop: - div.offsetHeight / 2, ease: Expo.easeInOut});
+        },
+
+        onStartClicked: function(e) {
+            e.preventDefault();
+            var button = document.querySelector('#start p');
+            var div = document.querySelector('#start');
+            button.removeEventListener('click', this.onStartClicked.bind(this));
+            TweenMax.killTweensOf(button);
+
+            var hideButtonTl = new TimelineMax({
+                onComplete: function() {
+                    TweenMax.to(button, 0, {display: 'none'});
+                    this.bootstrap();
+                }.bind(this)
+            });
+            hideButtonTl.gotoAndStop(0);
+
+            var top = document.querySelector('#top');
+            var bottom = document.querySelector('#bottom');
+
+            hideButtonTl.insert(TweenMax.to(top, 0.4, {width: 0, ease: Cubic.easeOut}), 0);
+            hideButtonTl.insert(TweenMax.to(bottom, 0.4, {width: 0, ease: Cubic.easeOut}), 0.2);
+            hideButtonTl.insert(TweenMax.to(div, 0.4, {opacity: 0, ease: Cubic.easeOut}), 0.3);
+            hideButtonTl.play();
+
+        },
+
+        bootstrap: function() {
+            // Kick it !
+            this.init();
+            // this.debug();
+            // this.createGUI();
+            this.initAudio();
+            this.animate();
+        },
+
         init: function()
         {
             this.trails = false;
             this.animationId = 0;
             this.endScreen = false;
-
-            // Renderer init
-            this.canvas = document.createElement('canvas');
-            this.canvas.width = Resize.screenWidth;
-            this.canvas.height = Resize.screenHeight;
-            this.canvas.id = "world";
-            this.context = this.canvas.getContext('2d');
-            document.body.appendChild(this.canvas);
-            Resize.enableSmoothing(false);
 
             // Glitch init
             this.glitchNoises = [];
@@ -59,13 +105,14 @@ define(['helpers/Resize', 'helpers/MathHelper', 'entities/Letter', 'entities/Att
             window.addEventListener('resize', this.onResize.bind(this));
         },
 
-        loadSong: function() {
+        initAudio: function() {
             this.audio = new AudioHelper();
             this.windAudio = new Howl({
-                urls: ['/sounds/ambiant-wind.mp3']
-            }).play().volume(0).fadeIn(0.5, 1000);
+                urls: ['sounds/ambiant-wind.mp3'],
+                autoplay: true
+            }).volume(0).fadeIn(GuiConstants.windVolume, 1000);
             this.ambiant = new Howl({
-                urls: ['/sounds/ambiant-dark.mp3'],
+                urls: ['sounds/ambiant-dark.mp3'],
                 autoplay: false
             });
         },
@@ -88,7 +135,7 @@ define(['helpers/Resize', 'helpers/MathHelper', 'entities/Letter', 'entities/Att
             GlobalSignals.trianglesAppeared.addOnce(this.showText.bind(this));
             GlobalSignals.particlesAppeared.add(function() {
                 this.windAudio.fadeOut(0, 1600);
-                this.ambiant.play().volume(0).fadeIn(0.3, 1600);
+                this.ambiant.play().volume(0).fadeIn(GuiConstants.ambiantVolume, 1600);
             }.bind(this));
 
             // Listen for word changing done
@@ -145,7 +192,7 @@ define(['helpers/Resize', 'helpers/MathHelper', 'entities/Letter', 'entities/Att
                 this.addMissingLetters(startX, startY, splitWord);
 
                 // this.playGlitchNoise();
-                this.audio.load('/sounds/glitchs/34.mp3');
+                this.audio.load('sounds/glitchs/34.mp3');
                 this.morphCurrentWord(startX, startY, word);
                 this.addEvents();
             }.bind(this), timer);
@@ -210,7 +257,7 @@ define(['helpers/Resize', 'helpers/MathHelper', 'entities/Letter', 'entities/Att
 
             var explodeTl = new TimelineMax({onUpdate: this.updateAttractorsMass.bind(this)});
 
-            var duration = 3;
+            var duration = 4;
             explodeTl.insert(TweenMax.to(GuiConstants, duration, {mass: 120, onComplete: this.stopGlitch.bind(this)}), 0);
             explodeTl.insert(TweenMax.to(GuiConstants, duration, {mass: 0}), duration);
 
@@ -273,7 +320,7 @@ define(['helpers/Resize', 'helpers/MathHelper', 'entities/Letter', 'entities/Att
 
         stopGlitch: function() {
             // Howler.Howler.mute();
-            TweenMax.to(this.canvas, 1.5, {opacity: 0, ease: Elastic.easeOut, onStart: function() {
+            TweenMax.to(this.canvas, 1.5, {opacity: 1, ease: Elastic.easeOut, onStart: function() {
                     this.bip.noteOff && this.bip.noteOff(0);
                     this.bip2.noteOff && this.bip2.noteOff(0);
                     this.bip.frequency.value = 0;
@@ -286,13 +333,13 @@ define(['helpers/Resize', 'helpers/MathHelper', 'entities/Letter', 'entities/Att
                     TweenMax.to(this.canvas, 1.5, {overwrite: "all", opacity: 1});
                     TweenMax.to(this.tvScreen, 3, {opacity: 0.5});
                     this.tvNoise = new Howl({
-                        urls: ['/sounds/tv-static.mp3'],
+                        urls: ['sounds/tv-static.mp3'],
                         autoplay: true,
                         loop: true
                     }).play().volume(1);
                     setTimeout(function() {
                         this.dispose();
-                    }.bind(this), 3500);
+                    }.bind(this), 2500);
                 }.bind(this)
             });
         },
@@ -316,23 +363,26 @@ define(['helpers/Resize', 'helpers/MathHelper', 'entities/Letter', 'entities/Att
         endAnimation: function() {
             // console.log('[endAnimation]');
             this.ambiant.fadeOut(0, 1500);
-            this.glitchInterval = 5;
+            this.glitchInterval = 15;
             this.explodeText();
 
             // Delay the fuckup
             setTimeout(function() {
-                this.bip = this.audio.createOscillator(400, 0.5);
-                this.bip2 = this.audio.createOscillator(100, 0.2);
+                this.bip = this.audio.createOscillator(400, this.bipVolume);
+                this.bip2 = this.audio.createOscillator(100, this.bip2Volume);
                 this.trails = true;
             }.bind(this), 2400);
         },
 
         dispose: function() {
             cancelAnimationFrame(this.animationId);
-            TweenMax.to(this.canvas, 0.1, {scaleY: 0, /*opacity: 0,*/ ease: Cubic.easeInOut, onComplete: function() {
+            var disposeTl = new TimelineMax({onComplete: function() {
                     Howler.Howler.mute();
                 }
             });
+            disposeTl.insert(TweenMax.to(this.canvas, 0.3, {scaleY: 0.01, backgroundColor: '#FFF', ease: Cubic.easeInOut}), 0);
+            disposeTl.insert(TweenMax.to(this.canvas, 0.15, {scaleX: 0, ease: Cubic.easeInOut}), 0.3);
+            disposeTl.play();
         },
 
         createGUI: function() {
