@@ -1,6 +1,6 @@
 define(function() {
     var guiConstants = {
-        debug: false,
+        debug: true,
         drawAttractor: false,
         timeScale: 10,
         mass: 10,

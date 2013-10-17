@@ -1,9 +1,10 @@
-define(['helpers/Resize', 'helpers/MathHelper', 'entities/Letter', 'entities/Attractor', 'entities/Particle', 'helpers/ColorHelper', 'data/GlobalSignals', 'data/GuiConstants', 'entities/Glitcher', 'helpers/AudioHelper', 'Howler'], function(Resize, MathHelper, Letter, Attractor, Particle, ColorHelper, GlobalSignals, GuiConstants, Glitcher, AudioHelper, Howler) {
+define(['helpers/Resize', 'helpers/MathHelper', 'entities/Letter', 'entities/Attractor', 'entities/Particle', 'helpers/ColorHelper', 'data/GlobalSignals', 'data/GuiConstants', 'entities/Glitcher', 'helpers/AudioHelper', 'Howler', 'Stats', 'entities/TvScreen'], function(Resize, MathHelper, Letter, Attractor, Particle, ColorHelper, GlobalSignals, GuiConstants, Glitcher, AudioHelper, Howler, Stats, TvScreen) {
 
     var Playground = function()
     {
         // Kick it !
         this.init();
+        this.debug();
         // this.createGUI();
         this.loadSong();
         this.animate();
@@ -14,6 +15,7 @@ define(['helpers/Resize', 'helpers/MathHelper', 'entities/Letter', 'entities/Att
         {
             this.trails = false;
             this.animationId = 0;
+            this.endScreen = false;
 
             // Renderer init
             this.canvas = document.createElement('canvas');
@@ -233,19 +235,22 @@ define(['helpers/Resize', 'helpers/MathHelper', 'entities/Letter', 'entities/Att
             else {
                 this.context.clearRect(0, 0, Resize.screenWidth, Resize.screenHeight);
             }
-            if(this.isDebug)
-            {
-                this.stats.update();
+            this.stats.update();
+
+            if(this.endScreen) {
+                this.tvScreen.update(this.context);
+            }
+            else {
+                this.context.globalCompositeOperation = "lighter";
+
+                // EXPERIMENT LOGIC
+                for(var i = 0; i < this.letterGroup.length; i++) {
+                    this.letterGroup[i].draw(this.context, Resize.halfScreenWidth, Resize.halfScreenHeight);
+                }
+
+                this.updateGlitchs();
             }
 
-            this.context.globalCompositeOperation = "lighter";
-
-            // EXPERIMENT LOGIC
-            for(var i = 0; i < this.letterGroup.length; i++) {
-                this.letterGroup[i].draw(this.context, Resize.halfScreenWidth, Resize.halfScreenHeight);
-            }
-
-            this.updateGlitchs();
 
             this.animationId = requestAnimationFrame(this.animate.bind(this));
         },
@@ -257,7 +262,6 @@ define(['helpers/Resize', 'helpers/MathHelper', 'entities/Letter', 'entities/Att
                     this.playGlitchNoise();
                     this.glitcher.updateImage(this.context, 0, 0, Resize.screenWidth, Resize.screenHeight);
                     this.glitcher.glitch(this.context, 0, 0, Resize.screenWidth, Resize.screenHeight, 30);
-
                 }
                 if(this.glitchBand && this.glitchBandTimer++ >= this.glitchBandInterval) {
                     this.glitchBandTimer = 0;
@@ -268,20 +272,21 @@ define(['helpers/Resize', 'helpers/MathHelper', 'entities/Letter', 'entities/Att
         },
 
         stopGlitch: function() {
-            TweenMax.to(this.canvas, 1, {opacity: 0, ease: Cubic.easeInOut, onComplete: function() {
+            Howler.Howler.mute();
+            TweenMax.to(this.canvas, 1.5, {opacity: 0, ease: Elastic.easeOut, onStart: function() {
                     cancelAnimationFrame(this.animationId);
-                    Howler.Howler.mute();
-                    this.playGlitchNoise();
-                    this.playGlitchNoise();
-                    this.playGlitchNoise();
-                    this.playGlitchNoise();
                     this.bip.noteOff && this.bip.noteOff(0);
                     this.bip2.noteOff && this.bip2.noteOff(0);
                     this.bip.frequency.value = 0;
                     this.bip2.frequency.value = 0;
                     this.bip.disconnect();
                     this.bip2.disconnect();
-                    document.body.removeChild(this.canvas);
+                    // document.body.removeChild(this.canvas);
+                    this.tvScreen = new TvScreen();
+                    this.endScreen = true;
+                    this.trails = false;
+                    this.animationId = requestAnimationFrame(this.animate.bind(this));
+                    TweenMax.to(this.canvas, 1.5, {opacity: 1, ease: Elastic.easeIn});
                 }.bind(this)
             });
         },
@@ -314,13 +319,6 @@ define(['helpers/Resize', 'helpers/MathHelper', 'entities/Letter', 'entities/Att
                 this.bip2 = this.audio.createOscillator(100, 0.2);
                 this.trails = true;
             }.bind(this), 2400);
-        },
-
-        drawScalines: function() {
-            this.context.fillStyle = "#111";
-            for(var i = 0; i < Resize.screenHeight; i+= 4) {
-                this.context.fillRect(0, i, Resize.screenWidth, 1);
-            }
         },
 
         createGUI: function() {
@@ -368,6 +366,16 @@ define(['helpers/Resize', 'helpers/MathHelper', 'entities/Letter', 'entities/Att
             }.bind(this));
 
             attractors.open();
+        },
+
+        debug: function() {
+            this.stats = new Stats();
+            this.stats.domElement.style.position = 'absolute';
+            this.stats.domElement.style.left = '0px';
+            this.stats.domElement.style.top = '0px';
+            this.stats.domElement.style.zIndex = '10';
+
+            document.body.appendChild( this.stats.domElement );
         }
     };
 

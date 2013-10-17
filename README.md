@@ -2,9 +2,11 @@ color-experiment-workshop
 =========================
 
 A one week JS experiment based on a chosen color.
-A Gobelins CRMA2014 class directed by [Makio](https://twitter.com/makio64).
+A [Gobelins](http://gobelins.fr) [CRMA2014](http://crma2014.gobelins.fr/) class directed by [Makio](https://twitter.com/makio64).
 
 Javascript + Custom helpers + Canvas2D.
+
+Better on Chrome, Fullscreen & sound please :)
 
 Libs:
 * dat.GUI

@@ -17,6 +17,7 @@ define(['data/Letters', 'entities/Vector', 'entities/LetterPoint', 'helpers/Math
 
         this.position = new Vector(x, y);
 
+        this.maxParticles = 6;
         this.letter = Letters[letter];
         // console.log('letter', this.letter, letter);
 
@@ -31,7 +32,7 @@ define(['data/Letters', 'entities/Vector', 'entities/LetterPoint', 'helpers/Math
         this.letterPoints = [];
         // this.triangles = [];
         for(var i = 0; i < this.letter.length; i++) {
-            this.letterPoints[i] = this.addPoint(this.position.x + this.width * this.letter[i].x, this.position.y + this.height * this.letter[i].y, 5, i);
+            this.letterPoints[i] = this.addPoint(this.position.x + this.width * this.letter[i].x, this.position.y + this.height * this.letter[i].y, this.maxParticles, i);
 
             this.triangulateTl.insert(TweenMax.to(this.letterPoints[i], 1.5, {opacity: 1, ease: Cubic.easeInOut}), this.id * 0.15 + i * 0.15);
         }
@@ -71,7 +72,7 @@ define(['data/Letters', 'entities/Vector', 'entities/LetterPoint', 'helpers/Math
             this.position.y = newY;
 
             this.removeUselessPoints(oldLength);
-            this.addMissingPoints(oldLength, 5);
+            this.addMissingPoints(oldLength, this.maxParticles);
 
             this.translatePoints();
         },
