@@ -16,7 +16,7 @@ define(['helpers/MathHelper', 'helpers/Resize'], function(MathHelper, Resize) {
                     // var color = ~~(Math.cos(Math.sin(this.angleX * i * j)) * 255);// * Math.sin(Math.cos(this.angleY * Math.tan(0.2))));
 
                     context.fillStyle = "rgb(" + color + ", " + color + ", " + color + ")";
-                    context.fillRect(i * Math.cos(this.angleX * i * 0.2), j, this.step, this.step * 0.5);
+                    context.fillRect(i * Math.cos(this.angleX * i * 0.2), j, this.step, this.step * 0.25);
                     this.angleX += 0.03;
                     this.angleY += 0.07;
                 }
