@@ -93,6 +93,8 @@ define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Lette
 
         changeWord: function() {
             this.resetEvents();
+            console.log(this.letterGroup[3]);
+            console.log(this.letterGroup[4]);
 
             this.glitchInterval = Math.max(1, 80 - 20 * this.wordIndex);
 

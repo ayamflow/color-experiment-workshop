@@ -72,7 +72,7 @@ define(['data/Letters', 'entities/Vector', 'entities/LetterPoint', 'helpers/Math
             var showingNumber = this.letterPoints.length >> 1,
             index;
             console.log('[determineShowingTriangles]', showingNumber);
-            for(i = 0; i < showingNumber; i++) {
+            for(var i = 0; i < showingNumber; i++) {
                 index = ~~(Math.random() * (this.letterPoints.length - 2));
                 this.letterPoints[index].showing = true;
             }
