@@ -110,7 +110,8 @@ define(['helpers/Resize', 'helpers/MathHelper', 'entities/Letter', 'entities/Att
             this.windAudio = new Howl({
                 urls: ['sounds/ambiant-wind.mp3'],
                 autoplay: true
-            }).volume(0).fadeIn(GuiConstants.windVolume, 1000);
+            // }).volume(0).fadeIn(GuiConstants.windVolume, 1000);
+            }).volume(GuiConstants.windVolume);
             this.ambiant = new Howl({
                 urls: ['sounds/ambiant-dark.mp3'],
                 autoplay: false
@@ -135,7 +136,8 @@ define(['helpers/Resize', 'helpers/MathHelper', 'entities/Letter', 'entities/Att
             GlobalSignals.trianglesAppeared.addOnce(this.showText.bind(this));
             GlobalSignals.particlesAppeared.add(function() {
                 this.windAudio.fadeOut(0, 1600);
-                this.ambiant.play().volume(0).fadeIn(GuiConstants.ambiantVolume, 1600);
+                // this.ambiant.play().volume(0).fadeIn(GuiConstants.ambiantVolume, 1600);
+                this.ambiant.play().volume(GuiConstants.ambiantVolume);
             }.bind(this));
 
             // Listen for word changing done
