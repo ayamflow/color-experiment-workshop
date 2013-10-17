@@ -8,7 +8,7 @@ define(function() {
         for(var i = 0; i < this.density; i++) {
             this.pool.push(new Class());
         }
-        this.position = this.pool.length - 1;
+        // this.position = this.pool.length - 1;
     };
 
     Pool.prototype = {
@@ -17,12 +17,16 @@ define(function() {
             //     this.density += this.overflowIncrement;
             // }
             // else {
-                return this.pool[--this.position];
+                // return this.pool[--this.position];
             // }
+            if(this.position >= this.density) {
+                this.position = 0;
+            }
+            return this.pool[this.position++];
         },
 
         release: function(poolable) {
-            this.pool[this.position++] = poolable;
+            // this.pool[this.position++] = poolable;
         }
     };
 

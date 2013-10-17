@@ -9,6 +9,7 @@ require.config({
         tinycolor: '../../lib/tinycolor.min',
         TweenMax: '../../lib/TweenMax.min',
         signals: '../../lib/signals.min',
+        Howler: '../../lib/howler.min'
     },
     shim: {
         'Stats': {
@@ -34,6 +35,9 @@ require.config({
         },
         'signals': {
             exports: 'signals'
+        },
+        'Hower': {
+            exports: 'Howler'
         }
     }
 });

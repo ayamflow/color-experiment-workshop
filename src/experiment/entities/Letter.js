@@ -72,7 +72,7 @@ define(['data/Letters', 'entities/Vector', 'entities/LetterPoint', 'helpers/Math
             var showingNumber = this.letterPoints.length >> 1,
             index;
             console.log('[determineShowingTriangles]', showingNumber);
-            for(i = 0; i < showingNumber; i++) {
+            for(var i = 0; i < showingNumber; i++) {
                 index = ~~(Math.random() * (this.letterPoints.length - 2));
                 this.letterPoints[index].showing = true;
             }
@@ -110,12 +110,12 @@ define(['data/Letters', 'entities/Vector', 'entities/LetterPoint', 'helpers/Math
             for(var i = 0; i < this.letter.length; i++) {
                 if(this.letterPoints[count]) {
                     // console.log(this.letterPoints[count]);
-                    TweenMax.to(this.letterPoints[count].position, 2.5, {
+                    TweenMax.to(this.letterPoints[count].position, 1.6, {
                         x: this.position.x + this.width * this.letter[i].x,
                         y: this.position.y + this.height * this.letter[i].y,
                         opacity: 1,
                         // delay: i * 0.2,
-                        // ease: Quad.easeInOut,
+                        ease: Back.easeOut,
                         onStart: function(index) {
                             this.letterPoints[index].morphing = true;
                         }.bind(this),
@@ -162,11 +162,11 @@ define(['data/Letters', 'entities/Vector', 'entities/LetterPoint', 'helpers/Math
             // Link points
             for(var i = 0; i < this.letterPoints.length; i++) {
                 this.letterPoints[i].update(context);
-                context.globalCompositeOperation = "lighter";
+                // context.globalCompositeOperation = "lighter";
                 if(i < this.letterPoints.length - 1) {
                     this.drawLines(context, this.letterPoints[i], this.letterPoints[i+1]);
                 }
-                context.globalCompositeOperation = "source-over"; // reset compositing
+                // context.globalCompositeOperation = "source-over"; // reset compositing
             }
         },
 
