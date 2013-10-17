@@ -35,7 +35,7 @@ define(['helpers/Resize', 'helpers/MathHelper', 'entities/Letter', 'entities/Att
             var index;
             for(var i = 0; i < glitches.length; i++) {
                 index = glitches[i] < 10 ? "0" + glitches[i] : glitches[i];
-                this.glitchNoises[i] = "sounds/glitchs/" + index + ".wav";
+                this.glitchNoises[i] = "sounds/glitchs/" + index + ".mp3";
             }
             this.glitchTimer = 0;
             this.glitchBandTimer = 0;
@@ -155,7 +155,7 @@ define(['helpers/Resize', 'helpers/MathHelper', 'entities/Letter', 'entities/Att
                 this.addMissingLetters(startX, startY, splitWord);
 
                 // this.playGlitchNoise();
-                this.audio.load('/sounds/glitchs/34.wav');
+                this.audio.load('/sounds/glitchs/34.mp3');
                 this.morphCurrentWord(startX, startY, word);
                 this.addEvents();
             }.bind(this), timer);
