@@ -8,6 +8,7 @@ define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Lette
             this.debug();
         }
         this.trails = false;
+        this.animationId = 0;
 
         // Kick it !
         this.init();
@@ -88,11 +89,11 @@ define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Lette
             GlobalSignals.morphingCompleted.addOnce(this.changeWord.bind(this));
             GlobalSignals.trianglesAppeared.addOnce(this.showText.bind(this));
             GlobalSignals.particlesAppeared.add(function() {
-                this.windAudio.fadeOut(0, 800);
+                this.windAudio.fadeOut(0, 1600);
                 // this.ambiant = new Howl({
                     // urls: ['/sounds/ambiant-dark.mp3']
                 // }).play().volume(0).fadeIn(0.2, 3000);
-                this.ambiant.play().volume(0).fadeIn(0.2, 3000);
+                this.ambiant.play().volume(0).fadeIn(0.3, 1600);
             }.bind(this));
 
             // Listen for word changing done
@@ -131,14 +132,8 @@ define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Lette
 
             this.setGlitchData();
             if(this.wordIndex >= this.words.length - 1) {
-                console.log('YENAPU');
-                this.ambiant.fadeOut(0, 1500);
-                this.bip = this.audio.createOscillator();
-                this.trails = true;
-                // this.glitchInterval = 35;
-                this.glitchInterval = 5;
-                // return GlobalSignals.textTransformCompleted.dispatch();
-                return this.explodeText();
+                this.endAnimation();
+                return;
             }
 
             // Fetch next word
@@ -219,10 +214,10 @@ define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Lette
             this.resetEvents();
 
             // var explodeTl = new TimelineMax({onUpdate: this.updateAttractorsMass.bind(this), onComplete: this.createFluid.bind(this)});
-            var explodeTl = new TimelineMax({onUpdate: this.updateAttractorsMass.bind(this), onComplete: this.stopGlitch.bind(this)});
+            var explodeTl = new TimelineMax({onUpdate: this.updateAttractorsMass.bind(this)});//, onComplete: this.stopGlitch.bind(this)});
 
             var duration = 3;
-            explodeTl.insert(TweenMax.to(GuiConstants, duration, {mass: 120}), 0);
+            explodeTl.insert(TweenMax.to(GuiConstants, duration, {mass: 120, onComplete: this.stopGlitch.bind(this)}), 0);
             explodeTl.insert(TweenMax.to(GuiConstants, duration, {mass: 0}), duration);
 
             explodeTl.play();
@@ -260,7 +255,7 @@ define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Lette
 
             this.updateGlitchs();
 
-            requestAnimationFrame(this.animate.bind(this));
+            this.animationId = requestAnimationFrame(this.animate.bind(this));
         },
 
         updateGlitchs: function() {
@@ -287,7 +282,16 @@ define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Lette
         },
 
         stopGlitch: function() {
-            TweenMax.to(this, 1, {glitchInterval: 120});
+            TweenMax.to(this.canvas, 1, {opacity: 0, ease: Cubic.easeInOut, onComplete: function() {
+                    cancelAnimationFrame(this.animationId);
+                    Howler.mute();
+                    this.bip.noteOff && this.bip.noteOff(0);
+                    this.bip.frequency.value = 0;
+                    this.bip.disconnect();
+                    this.bip = null;
+                }.bind(this)
+            });
+            // TweenMax.to(this, 1, {glitchInterval: 120});
         },
 
         setGlitchData: function() {
@@ -305,6 +309,19 @@ define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Lette
             for(var i = 0; i < Resize.screenHeight; i+= 4) {
                 this.context.fillRect(0, i, Resize.screenWidth, 1);
             }
+        },
+
+        endAnimation: function() {
+            console.log('[endAnimation]');
+            this.ambiant.fadeOut(0, 1500);
+            this.bip = this.audio.createOscillator();
+            console.log('this.bip', this.bip);
+            // this.glitchInterval = 35;
+            setTimeout(function() {
+                this.trails = true;
+            }.bind(this), 700);
+            this.glitchInterval = 5;
+            this.explodeText();
         },
 
         createGUI: function() {
