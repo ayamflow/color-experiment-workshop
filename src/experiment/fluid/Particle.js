@@ -23,6 +23,9 @@ define(['fluid/Constants'], function(Constants) {
             case 1: // BLUE
                 this.color = "#0000FF";
                 break;
+            case 2:
+                this.color = "#880066";
+                break;
         }
     };
 

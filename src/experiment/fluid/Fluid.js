@@ -36,9 +36,11 @@ define(['helpers/MathHelper', 'helpers/Mouse', 'fluid/Constants', 'fluid/Grid', 
             this.move(context);
         },
 
-        pour: function() {
+        pour: function(x, y) {
             for(var i = -4; i <= 4; i++) {
-                this.particles[this.particlesNumber++] = new Particle(Mouse.x + i * 10, Mouse.y, Math.random() > 0.5 ? 0 : 1);
+                // this.particles[this.particlesNumber++] = new Particle(Mouse.x + i * 10, Mouse.y, 2);
+                this.particles[this.particlesNumber++] = new Particle(x, y + i, 2);
+                this.particles[this.particlesNumber - 1].vx = 3;
                 this.particles[this.particlesNumber - 1].vy = 5;
 
                 if(this.particlesNumber >= this.maxParticles) {
@@ -63,7 +65,8 @@ define(['helpers/MathHelper', 'helpers/Mouse', 'fluid/Constants', 'fluid/Grid', 
                 this.moveParticle(particle);
 
                 context.fillStyle = particle.color;
-                context.fillRect(particle.x - 1, particle.y - 1, 3, 3);
+                context.fillRect(particle.x, particle.y, 2, 2);
+                // context.fillRect(particle.x - 1, particle.y - 1, 3, 3);
             }
         },
 

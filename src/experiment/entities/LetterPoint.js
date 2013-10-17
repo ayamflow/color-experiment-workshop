@@ -22,7 +22,9 @@ define(['entities/Vector', 'entities/Attractor', 'entities/Particle', 'helpers/M
             pointsTl.play();
         });
 
-        this.showing = false;
+        // this.showing = false;
+        // this.showing = true;
+        this.showing = Math.random() > 0.6;
 
         // Particles init
         for(var i = 0; i < this.particlesNumber; i++) {
@@ -44,12 +46,7 @@ define(['entities/Vector', 'entities/Attractor', 'entities/Particle', 'helpers/M
             for(var i = 0; i < this.particlesNumber; i++) {
 
                 if(this.morphing) {
-                    // this.particles[i].position = this.position.clone();
-                    // var position = this.position.clone();
-                    // this.particles[i].position.x = position.x + 30 * Math.cos(this.angles[i]);
-                    // this.particles[i].position.y = position.y + 30 * Math.sin(this.angles[i]);
-                    // this.attractor.position = position;
-                    this.smoothMoveParticle(this.particles[i]);
+                    this.smoothMoveParticle(this.particles[i], i);
                 }
                 else {
                     this.particles[i].applyForce(this.attractor.attract(this.particles[i]));
@@ -60,17 +57,17 @@ define(['entities/Vector', 'entities/Attractor', 'entities/Particle', 'helpers/M
                     }
                 }
                 this.particles[i].update(context);
+                this.angles[i] += 0.03;
             }
-            this.angle += 0.03;
 
-            if(GuiConstants.debug) this.draw(context);
+            if(GuiConstants.drawAttractor) this.draw(context);
             // this.attractor.draw(context);
         },
 
         smoothMoveParticle: function(particle, i) {
             var position = this.position.clone();
-            particle.position.x = position.x + 30 * Math.cos(this.angles[i]);
-            particle.position.y = position.y + 30 * Math.sin(this.angles[i]);
+            particle.position.x = position.x + 20 * Math.cos(this.angles[i]);
+            particle.position.y = position.y + 20 * Math.sin(this.angles[i]);
             this.attractor.position = position;
         },
 

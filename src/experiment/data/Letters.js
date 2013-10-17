@@ -18,7 +18,11 @@ define(['entities/Vector'], function(Vector) {
             new Vector(1, 1),
             new Vector(1, 2),
             new Vector(1, 1),
-            new Vector(0, 1)
+            new Vector(0, 1),
+            new Vector(1, 1),
+            new Vector(1, 2),
+            new Vector(0, 2)
+
         ],
         c: [
             new Vector(1, 0),
@@ -40,6 +44,14 @@ define(['entities/Vector'], function(Vector) {
             new Vector(0, 1),
             new Vector(0, 2),
             new Vector(1, 2),
+            new Vector(0, 2),
+            new Vector(0, 1),
+            new Vector(1, 1)
+        ],
+        f: [
+            new Vector(1, 0),
+            new Vector(0, 0),
+            new Vector(0, 1),
             new Vector(0, 2),
             new Vector(0, 1),
             new Vector(1, 1)
@@ -106,6 +118,14 @@ define(['entities/Vector'], function(Vector) {
             new Vector(1, 1),
             new Vector(1, 2),
             new Vector(0, 2)
+        ],
+        t: [
+            new Vector(0, 0),
+            new Vector(1, 0),
+            new Vector(0.5, 0),
+            new Vector(0.5, 1),
+            new Vector(0.5, 2)
+
         ],
         u: [
             new Vector(0, 0),

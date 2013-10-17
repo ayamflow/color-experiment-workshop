@@ -1,4 +1,4 @@
-define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Letter', 'entities/Attractor', 'entities/Particle', 'Stats', 'dat', 'helpers/ColorHelper', 'data/GlobalSignals', 'data/GuiConstants'], function(Resize, Mouse, MathHelper, Letter, Attractor, Particle, Stats, dat, ColorHelper, GlobalSignals, GuiConstants) {
+define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Letter', 'entities/Attractor', 'entities/Particle', 'Stats', 'dat', 'helpers/ColorHelper', 'data/GlobalSignals', 'data/GuiConstants', 'fluid/Fluid', 'entities/Glitcher'], function(Resize, Mouse, MathHelper, Letter, Attractor, Particle, Stats, dat, ColorHelper, GlobalSignals, GuiConstants, Fluid, Glitcher) {
 
     var Playground = function()
     {
@@ -10,7 +10,7 @@ define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Lette
 
         // Kick it !
         this.init();
-        this.createGUI();
+        // this.createGUI();
         this.animate();
     };
 
@@ -24,13 +24,21 @@ define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Lette
             this.canvas = document.createElement('canvas');
             this.canvas.width = Resize.screenWidth;
             this.canvas.height = Resize.screenHeight;
+            this.canvas.id = "world";
             this.context = this.canvas.getContext('2d');
             document.body.appendChild(this.canvas);
 
             Resize.enableSmoothing(false);
 
+            this.glitchTimer = 0;
+            // this.glitchInterval = 80;
+            // this.glitchInterval = 1;
+            this.glitcher = new Glitcher(this.context, 0, 0, Resize.screenWidth, Resize.screenHeight);
+
             // Variables
+            // this.words = ["purple", "stands", "for", "disorder"];
             this.words = ["purple", "means", "disorder"];
+            // this.words = ["coucou", "tete", "de", "bite"];
             GuiConstants.letterWidth = GuiConstants.letterHeight = 90;
             GuiConstants.letterSpacing = 60;
             this.wordIndex = 0;
@@ -41,6 +49,7 @@ define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Lette
 
             // Kick it
             this.createWord(this.words[this.wordIndex]);
+            // this.createFluid();
 
             window.addEventListener('resize', this.onResize.bind(this));
         },
@@ -85,9 +94,17 @@ define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Lette
         changeWord: function() {
             this.resetEvents();
 
+            this.glitchInterval = Math.max(1, 80 - 20 * this.wordIndex);
+
+            if(this.wordIndex == this.words.length - 1) {
+                this.glitchData = this.context.getImageData(0, 0, Resize.screenWidth, Resize.screenHeight);
+            }
             if(this.wordIndex >= this.words.length - 1) {
                 console.log('YENAPU');
-                return GlobalSignals.textTransformCompleted.dispatch();
+                console.log("Chelou:", this.letterGroup[3]);
+                this.glitchInterval = 22;
+                // return GlobalSignals.textTransformCompleted.dispatch();
+                return this.explodeText();
             }
 
             // Fetch next word
@@ -98,11 +115,14 @@ define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Lette
             var startX = Resize.halfScreenWidth - (splitWord.length * (GuiConstants.letterWidth + GuiConstants.letterSpacing)) / 2;
             var startY = Resize.halfScreenHeight - GuiConstants.letterHeight;
 
-            this.removeUnusedLetters(splitWord);
-            this.addMissingLetters(startX, startY, splitWord);
+            var timer = GuiConstants.debug ? 1500 / GuiConstants.timeScale : 1500;
+            setTimeout(function() {
+                this.removeUnusedLetters(splitWord);
+                this.addMissingLetters(startX, startY, splitWord);
 
-            this.morphCurrentWord(startX, startY, word);
-            this.addEvents();
+                this.morphCurrentWord(startX, startY, word);
+                this.addEvents();
+            }.bind(this), timer);
         },
 
         morphCurrentWord: function(x, y, word) {
@@ -113,35 +133,38 @@ define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Lette
         },
 
         addMissingLetters: function(x, y, newWord) {
-            for(i = this.letterGroup.length; i < newWord.length; i++) {
+            for(var i = this.letterGroup.length; i < newWord.length; i++) {
                 this.letterGroup[i] = new Letter(newWord[i], Resize.halfScreenWidth, Resize.halfScreenHeight, GuiConstants.letterWidth, GuiConstants.letterHeight, i);
                 TweenMax.from(this.letterGroup[i].position, 1, {x: this.letterGroup[i].position.x - 50, y: this.letterGroup[i].position.y - 50, ease: Cubic.easeInOut});
                 TweenMax.to(this.letterGroup[i], 1, {
                     opacity: 1,
-                    x: i * (GuiConstants.letterWidth + GuiConstants.letterSpacing) + x,
-                    y: y,
+                    delay: i * 0.04,
                     ease: Expo.easeInOut
                 });
             }
         },
 
         removeUnusedLetters: function(newWord) {
-            for(i = newWord.length; i < this.letterGroup.length; i++) {
+            for(var i = newWord.length; i < this.letterGroup.length; i++) {
                 this.removeLetter(i);
             }
         },
 
         addLetter: function(letter, index, x, y) {
-            console.log('[addLetter]', index, x, y);
+            // console.log('[addLetter]', index, x, y);
             return new Letter(letter, x, y, GuiConstants.letterWidth, GuiConstants.letterHeight, index);
         },
 
         removeLetter: function(index) {
-            console.log('[removeLetter]', index);
-            TweenMax.to(this.letterGroup[index], 1, {opacity: 0, ease: Expo.easeInOut, onComplete: function() {
+            // console.log('[removeLetter]', index);
+            TweenMax.to(this.letterGroup[index], 0.5, {opacity: 0, ease: Expo.easeInOut, onComplete: function() {
                     this.letterGroup.splice(index, 1);
                 }.bind(this)
             });
+        },
+
+        createFluid: function() {
+            this.fluid = new Fluid(Resize.screenWidth, Resize.screenHeight, 5000);
         },
 
         onResize: function() {
@@ -153,12 +176,25 @@ define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Lette
         },
 
         explodeText: function() {
-            console.log('[explodeText]');
+            console.log('[explodeText]', GuiConstants.mass);
             this.resetEvents();
-            TweenMax.to(GuiConstants, 2.5, {mass: 100, ease: Cubic.easeInOut, onComplete: function() {
-                    GuiConstants.mass = 0;
+
+            var explodeTl = new TimelineMax({onUpdate: this.updateAttractorsMass.bind(this)});//, onComplete: this.createFluid.bind(this)});
+
+            var duration = 3;
+            explodeTl.insert(TweenMax.to(GuiConstants, duration, {mass: 120}), 0);
+            explodeTl.insert(TweenMax.to(GuiConstants, duration, {mass: 0}), duration);
+
+            explodeTl.play();
+
+        },
+
+        updateAttractorsMass: function() {
+            for(var i = 0; i < this.letterGroup.length; i++) {
+                for(var j = 0; j < this.letterGroup[i].letterPoints.length; j++) {
+                    this.letterGroup[i].letterPoints[j].attractor.mass = GuiConstants.mass;
                 }
-            });
+            }
         },
 
         animate: function()
@@ -171,17 +207,50 @@ define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Lette
                 this.stats.update();
             }
 
+            this.context.globalCompositeOperation = "lighter";
+
             // EXPERIMENT LOGIC
             for(var i = 0; i < this.letterGroup.length; i++) {
                 this.letterGroup[i].draw(this.context, Resize.halfScreenWidth, Resize.halfScreenHeight);
             }
 
+            /*if(this.fluid) {
+                this.fluid.pour(20, Resize.halfScreenHeight);
+                this.fluid.pour(Resize.screenWidth - 20, Resize.halfScreenHeight);
+                this.fluid.update(this.context);
+            }*/
+
+            if(this.glitcher) {
+                if(this.glitchTimer++ >= this.glitchInterval) {
+                    this.glitchTimer = 0;
+                    if(this.glitchData) {
+                        this.glitcher.glitchFromData(this.context, 0, 0, this.glitchData, 30);
+                    }
+                    else {
+                        this.glitcher.updateImage(this.context, 0, 0, Resize.screenWidth, Resize.screenHeight);
+                        this.glitcher.glitch(this.context, 0, 0, Resize.screenWidth, Resize.screenHeight, 30);
+                        this.glitcher.glitch(this.context, 0, 0, Resize.screenWidth, Resize.screenHeight, 30);
+                    }
+
+                }
+                // this.glitcher.glitch(this.context, 0, 0, Resize.screenWidth, Resize.screenHeight, 30);
+                this.drawScalines();
+            }
+
             requestAnimationFrame(this.animate.bind(this));
+        },
+
+        drawScalines: function() {
+            this.context.fillStyle = "#111";
+            for(var i = 0; i < Resize.screenHeight; i+= 4) {
+                this.context.fillRect(0, i, Resize.screenWidth, 1);
+            }
         },
 
         createGUI: function() {
             this.gui = new dat.GUI();
             this.gui.add(GuiConstants, 'debug');
+            this.gui.add(GuiConstants, 'drawAttractor');
 
             var letters = this.gui.addFolder("Letters");
             var widthUpdate = letters.add(GuiConstants, 'letterWidth').min(10).max(200);
