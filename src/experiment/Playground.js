@@ -1,4 +1,4 @@
-define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Letter', 'entities/Attractor', 'entities/Particle', 'Stats', 'dat', 'helpers/ColorHelper', 'data/GlobalSignals', 'data/GuiConstants', 'entities/Glitcher', 'helpers/AudioHelper', 'Howler'], function(Resize, Mouse, MathHelper, Letter, Attractor, Particle, Stats, dat, ColorHelper, GlobalSignals, GuiConstants, Glitcher, AudioHelper, Howler) {
+define(['helpers/Resize', 'helpers/MathHelper', 'entities/Letter', 'entities/Attractor', 'entities/Particle', 'helpers/ColorHelper', 'data/GlobalSignals', 'data/GuiConstants', 'entities/Glitcher', 'helpers/AudioHelper', 'Howler'], function(Resize, MathHelper, Letter, Attractor, Particle, ColorHelper, GlobalSignals, GuiConstants, Glitcher, AudioHelper, Howler) {
 
     var Playground = function()
     {
@@ -12,16 +12,13 @@ define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Lette
     Playground.prototype = {
         init: function()
         {
-            this.isDebug = true;
+            this.isDebug = false;
             if(this.isDebug)
             {
                 this.debug();
             }
             this.trails = false;
             this.animationId = 0;
-
-            // Mouse init
-            this.mouse = Mouse;//new Mouse(Resize.screenWidth, Resize.screenHeight);
 
             // Renderer init
             this.canvas = document.createElement('canvas');
@@ -309,6 +306,7 @@ define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Lette
                     this.bip2.frequency.value = 0;
                     this.bip.disconnect();
                     this.bip2.disconnect();
+                    document.body.removeChild(this.canvas);
                 }.bind(this)
             });
             // TweenMax.to(this, 1, {glitchInterval: 120});
