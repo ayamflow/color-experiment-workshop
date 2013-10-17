@@ -1,11 +1,13 @@
-define(['entities/Vector', 'data/Colors', 'helpers/ColorHelper'], function(Vector, Colors, ColorHelper) {
+define(['entities/Vector', 'data/Colors', 'helpers/ColorHelper', 'helpers/MathHelper'], function(Vector, Colors, ColorHelper, MathHelper) {
     var Particle = function(x, y) {
         this.position = new Vector(x, y);
         this.velocity = new Vector();
         this.acceleration = new Vector();
         this.mass = 10;
 
-        this.fillStyle = Colors.PURPLE;
+        // this.fillStyle = Colors.PURPLE;
+        this.fillStyle = Colors.PURPLES[~~(MathHelper.rand(0, Colors.PURPLES.length - 1))];
+
         this.opacity = 0;
     };
 

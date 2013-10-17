@@ -8,7 +8,9 @@ define(['data/Letters', 'entities/Vector', 'entities/LetterPoint', 'helpers/Math
 
         this.position = new Vector(x, y);
 
-        this.lineColor = Colors.PURPLE;
+        // this.lineColor = Colors.PURPLE;
+        this.lineColor = Colors.PURPLES[~~(MathHelper.rand(0, Colors.PURPLES.length - 1))];
+
         this.strokeWidth = 1;
         this.opacity = 0;
         this.threshold = this.width > this.height ? this.width * 1.8 : this.height * 1.8;
@@ -25,8 +27,6 @@ define(['data/Letters', 'entities/Vector', 'entities/LetterPoint', 'helpers/Math
         });
 
         GlobalSignals.particlesAppeared.addOnce(this.playTl.bind(this));
-        // GlobalSignals.letterWidthChanged.add(this.onLetterWidthChanged.bind(this));
-        // GlobalSignals.letterHeightChanged.add(this.onLetterHeightChanged.bind(this));
 
         this.letterPoints = [];
         // this.triangles = [];
@@ -36,38 +36,11 @@ define(['data/Letters', 'entities/Vector', 'entities/LetterPoint', 'helpers/Math
             this.triangulateTl.insert(TweenMax.to(this.letterPoints[i], 1.5, {opacity: 1, ease: Cubic.easeInOut}), this.id * 0.15 + i * 0.15);
         }
 
-        // this.determineShowingTriangles();
-
         if(GuiConstants.debug) this.triangulateTl.timeScale(GuiConstants.timeScale);
         this.triangulateTl.gotoAndStop(0);
-        // this.triangulateTl.play();
     };
 
     Letter.prototype = {
-        /*onLetterWidthChanged: function() {
-            this.width = GuiConstants.letterWidth;
-            this.threshold = this.width > this.height ? this.width * 0.6 : this.height * 0.6;
-
-            for(var i = 0; i < this.letterPoints.length; i++){
-                this.letterPoints[i].position.x = this.position.x + this.width * this.letter[i].x;
-                for(var j = 0; j < this.letterPoints[i].particles.length; j++) {
-                    this.letterPoints[i].particles[j].position.x = this.letterPoints[i].position.x;
-                }
-            }
-        },
-
-        onLetterHeightChanged: function() {
-            this.height = GuiConstants.letterHeight;
-            this.threshold = this.width > this.height ? this.width * 0.6 : this.height * 0.6;
-
-            for(var i = 0; i < this.letterPoints.length; i++){
-                this.letterPoints[i].position.y = this.position.y + this.height * this.letter[i].y;
-                for(var j = 0; j < this.letterPoints[i].particles.length; j++) {
-                    this.letterPoints[i].particles[j].position.y = this.letterPoints[i].position.y;
-                }
-            }
-        },*/
-
         determineShowingTriangles: function() {
             var showingNumber = this.letterPoints.length >> 1,
             index;
@@ -100,8 +73,6 @@ define(['data/Letters', 'entities/Vector', 'entities/LetterPoint', 'helpers/Math
             this.removeUselessPoints(oldLength);
             this.addMissingPoints(oldLength, 5);
 
-            // this.determineShowingTriangles();
-
             this.translatePoints();
         },
 
@@ -114,7 +85,7 @@ define(['data/Letters', 'entities/Vector', 'entities/LetterPoint', 'helpers/Math
                         x: this.position.x + this.width * this.letter[i].x,
                         y: this.position.y + this.height * this.letter[i].y,
                         opacity: 1,
-                        // delay: i * 0.2,
+                        delay: /*this.id * 0.05 +*/ i * 0.2,
                         ease: Back.easeOut,
                         onStart: function(index) {
                             this.letterPoints[index].morphing = true;
@@ -162,11 +133,9 @@ define(['data/Letters', 'entities/Vector', 'entities/LetterPoint', 'helpers/Math
             // Link points
             for(var i = 0; i < this.letterPoints.length; i++) {
                 this.letterPoints[i].update(context);
-                // context.globalCompositeOperation = "lighter";
                 if(i < this.letterPoints.length - 1) {
                     this.drawLines(context, this.letterPoints[i], this.letterPoints[i+1]);
                 }
-                // context.globalCompositeOperation = "source-over"; // reset compositing
             }
         },
 

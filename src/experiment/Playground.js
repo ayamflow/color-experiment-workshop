@@ -12,11 +12,6 @@ define(['helpers/Resize', 'helpers/MathHelper', 'entities/Letter', 'entities/Att
     Playground.prototype = {
         init: function()
         {
-            this.isDebug = false;
-            if(this.isDebug)
-            {
-                this.debug();
-            }
             this.trails = false;
             this.animationId = 0;
 
@@ -44,8 +39,6 @@ define(['helpers/Resize', 'helpers/MathHelper', 'entities/Letter', 'entities/Att
 
             // Words init
             this.glitchTimer = 0;
-            // this.glitchInterval = 80;
-            // this.glitchInterval = 1;
             this.glitcher = new Glitcher(this.context, 0, 0, Resize.screenWidth, Resize.screenHeight);
 
             // Variables
@@ -60,7 +53,6 @@ define(['helpers/Resize', 'helpers/MathHelper', 'entities/Letter', 'entities/Att
 
             // Kick it
             this.createWord(this.words[this.wordIndex]);
-            // this.createFluid();
 
             window.addEventListener('resize', this.onResize.bind(this));
         },
@@ -94,9 +86,6 @@ define(['helpers/Resize', 'helpers/MathHelper', 'entities/Letter', 'entities/Att
             GlobalSignals.trianglesAppeared.addOnce(this.showText.bind(this));
             GlobalSignals.particlesAppeared.add(function() {
                 this.windAudio.fadeOut(0, 1600);
-                // this.ambiant = new Howl({
-                    // urls: ['/sounds/ambiant-dark.mp3']
-                // }).play().volume(0).fadeIn(0.2, 3000);
                 this.ambiant.play().volume(0).fadeIn(0.3, 1600);
             }.bind(this));
 
@@ -148,8 +137,7 @@ define(['helpers/Resize', 'helpers/MathHelper', 'entities/Letter', 'entities/Att
             var startX = Resize.halfScreenWidth - (splitWord.length * (GuiConstants.letterWidth + GuiConstants.letterSpacing)) / 2;
             var startY = Resize.halfScreenHeight - GuiConstants.letterHeight;
 
-            // var timer = GuiConstants.debug ? 1500 / GuiConstants.timeScale : 1500;
-            var timer = 1500;
+            var timer = 2500;
             setTimeout(function() {
                 this.removeUnusedLetters(splitWord);
                 this.addMissingLetters(startX, startY, splitWord);
@@ -170,14 +158,8 @@ define(['helpers/Resize', 'helpers/MathHelper', 'entities/Letter', 'entities/Att
 
         addMissingLetters: function(x, y, newWord) {
             for(var i = this.letterGroup.length; i < newWord.length; i++) {
-                // this.letterGroup[i] = new Letter(newWord[i], Resize.halfScreenWidth, Resize.halfScreenHeight, GuiConstants.letterWidth, GuiConstants.letterHeight, i);
+
                 this.letterGroup[i] = new Letter(newWord[i], this.letterGroup[i - 1].position.x + 15, this.letterGroup[i - 1].position.y, GuiConstants.letterWidth, GuiConstants.letterHeight, i);
-                // TweenMax.from(this.letterGroup[i].position, 1, {x: this.letterGroup[i].position.x - 50, y: this.letterGroup[i].position.y - 50, ease: Cubic.easeInOut});
-                // TweenMax.to(this.letterGroup[i], 1, {
-                    // opacity: 1,
-                    // delay: i * 0.15,
-                    // ease: Back.easeOut
-                // });
                 this.letterGroup[i].opacity = 1;
                 this.letterGroup[i] = new Letter(newWord[i], Resize.halfScreenWidth, Resize.halfScreenHeight, GuiConstants.letterWidth, GuiConstants.letterHeight, i);
                 TweenMax.from(this.letterGroup[i].position, 1, {x: this.letterGroup[i].position.x - 50, y: this.letterGroup[i].position.y - 50, ease: Cubic.easeInOut});
@@ -224,8 +206,7 @@ define(['helpers/Resize', 'helpers/MathHelper', 'entities/Letter', 'entities/Att
             // console.log('[explodeText]', GuiConstants.mass);
             this.resetEvents();
 
-            // var explodeTl = new TimelineMax({onUpdate: this.updateAttractorsMass.bind(this), onComplete: this.createFluid.bind(this)});
-            var explodeTl = new TimelineMax({onUpdate: this.updateAttractorsMass.bind(this)});//, onComplete: this.stopGlitch.bind(this)});
+            var explodeTl = new TimelineMax({onUpdate: this.updateAttractorsMass.bind(this)});
 
             var duration = 3;
             explodeTl.insert(TweenMax.to(GuiConstants, duration, {mass: 120, onComplete: this.stopGlitch.bind(this)}), 0);
@@ -274,17 +255,11 @@ define(['helpers/Resize', 'helpers/MathHelper', 'entities/Letter', 'entities/Att
                 if(this.glitchTimer++ >= this.glitchInterval) {
                     this.glitchTimer = 0;
                     this.playGlitchNoise();
-                    // if(this.glitchData) {
-                        // this.glitcher.glitchFromData(this.context, 0, 0, this.glitchData, Resize.halfScreenHeight - this.glitchData.height);
-                    // }
-                    // else {
-                        this.glitcher.updateImage(this.context, 0, 0, Resize.screenWidth, Resize.screenHeight);
-                        this.glitcher.glitch(this.context, 0, 0, Resize.screenWidth, Resize.screenHeight, 30);
-                    // }
+                    this.glitcher.updateImage(this.context, 0, 0, Resize.screenWidth, Resize.screenHeight);
+                    this.glitcher.glitch(this.context, 0, 0, Resize.screenWidth, Resize.screenHeight, 30);
 
                 }
                 if(this.glitchBand && this.glitchBandTimer++ >= this.glitchBandInterval) {
-                    // this.playGlitchNoise();
                     this.glitchBandTimer = 0;
                     this.glitcher.glitchFromData(this.context, 0, 0, this.glitchBand, Resize.halfScreenHeight - this.glitchBand.height, Math.random() > 0.5 ? 1 : 2);
                 }
@@ -309,7 +284,6 @@ define(['helpers/Resize', 'helpers/MathHelper', 'entities/Letter', 'entities/Att
                     document.body.removeChild(this.canvas);
                 }.bind(this)
             });
-            // TweenMax.to(this, 1, {glitchInterval: 120});
         },
 
         setGlitchData: function() {
@@ -317,7 +291,6 @@ define(['helpers/Resize', 'helpers/MathHelper', 'entities/Letter', 'entities/Att
                 this.glitchBand = this.context.getImageData(0, Resize.halfScreenHeight, Resize.screenWidth, 30);
             }
             else if(this.wordIndex == this.words.length - 1) {
-                // this.glitchData = this.context.getImageData(0, 0, Resize.screenWidth, Resize.screenHeight);
                 this.glitchData = this.context.getImageData(0, Resize.screenHeight >> 2, Resize.screenWidth, 60);
             }
         },
@@ -332,14 +305,15 @@ define(['helpers/Resize', 'helpers/MathHelper', 'entities/Letter', 'entities/Att
         endAnimation: function() {
             // console.log('[endAnimation]');
             this.ambiant.fadeOut(0, 1500);
-            this.bip = this.audio.createOscillator(300, 0.5);
-            this.bip2 = this.audio.createOscillator(200, 0.2);
-            // this.glitchInterval = 35;
-            setTimeout(function() {
-                this.trails = true;
-            }.bind(this), 700);
             this.glitchInterval = 5;
             this.explodeText();
+
+            // Delay the fuckup
+            setTimeout(function() {
+                this.bip = this.audio.createOscillator(400, 0.5);
+                this.bip2 = this.audio.createOscillator(100, 0.2);
+                this.trails = true;
+            }.bind(this), 2400);
         },
 
         drawScalines: function() {
@@ -394,15 +368,6 @@ define(['helpers/Resize', 'helpers/MathHelper', 'entities/Letter', 'entities/Att
             }.bind(this));
 
             attractors.open();
-        },
-
-        debug: function() {
-            this.stats = new Stats();
-            this.stats.domElement.style.position = 'absolute';
-            this.stats.domElement.style.left = '0px';
-            this.stats.domElement.style.top = '0px';
-            this.stats.domElement.style.zIndex = '100';
-            document.body.appendChild(this.stats.domElement);
         }
     };
 
