@@ -4,7 +4,7 @@ define(['helpers/Resize', 'helpers/MathHelper', 'entities/Letter', 'entities/Att
     {
         // Kick it !
         this.init();
-        this.debug();
+        // this.debug();
         // this.createGUI();
         this.loadSong();
         this.animate();
@@ -235,7 +235,7 @@ define(['helpers/Resize', 'helpers/MathHelper', 'entities/Letter', 'entities/Att
             else {
                 this.context.clearRect(0, 0, Resize.screenWidth, Resize.screenHeight);
             }
-            this.stats.update();
+            // this.stats.update();
 
             if(this.endScreen) {
                 this.tvScreen.update(this.context);
