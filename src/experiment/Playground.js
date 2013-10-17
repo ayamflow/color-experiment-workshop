@@ -46,6 +46,12 @@ define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Lette
             this.glitcher = new Glitcher(this.context, 0, 0, Resize.screenWidth, Resize.screenHeight);
 
             // Words init
+            this.glitchTimer = 0;
+            // this.glitchInterval = 80;
+            // this.glitchInterval = 1;
+            this.glitcher = new Glitcher(this.context, 0, 0, Resize.screenWidth, Resize.screenHeight);
+
+            // Variables
             this.words = ["purple", "means", "disorder"];
             GuiConstants.letterWidth = GuiConstants.letterHeight = 90;
             GuiConstants.letterSpacing = 60;
@@ -57,6 +63,7 @@ define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Lette
 
             // Kick it
             this.createWord(this.words[this.wordIndex]);
+            // this.createFluid();
 
             window.addEventListener('resize', this.onResize.bind(this));
         },
@@ -175,6 +182,13 @@ define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Lette
                     // ease: Back.easeOut
                 // });
                 this.letterGroup[i].opacity = 1;
+                this.letterGroup[i] = new Letter(newWord[i], Resize.halfScreenWidth, Resize.halfScreenHeight, GuiConstants.letterWidth, GuiConstants.letterHeight, i);
+                TweenMax.from(this.letterGroup[i].position, 1, {x: this.letterGroup[i].position.x - 50, y: this.letterGroup[i].position.y - 50, ease: Cubic.easeInOut});
+                TweenMax.to(this.letterGroup[i], 1, {
+                    opacity: 1,
+                    delay: i * 0.04,
+                    ease: Expo.easeInOut
+                });
             }
         },
 
@@ -322,6 +336,13 @@ define(['helpers/Resize', 'helpers/Mouse', 'helpers/MathHelper', 'entities/Lette
             }.bind(this), 700);
             this.glitchInterval = 5;
             this.explodeText();
+        },
+
+        drawScalines: function() {
+            this.context.fillStyle = "#111";
+            for(var i = 0; i < Resize.screenHeight; i+= 4) {
+                this.context.fillRect(0, i, Resize.screenWidth, 1);
+            }
         },
 
         createGUI: function() {
