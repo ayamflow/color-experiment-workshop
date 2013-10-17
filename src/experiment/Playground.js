@@ -363,7 +363,7 @@ define(['helpers/Resize', 'helpers/MathHelper', 'entities/Letter', 'entities/Att
         endAnimation: function() {
             // console.log('[endAnimation]');
             this.ambiant.fadeOut(0, 1500);
-            this.glitchInterval = 15;
+            this.glitchInterval = 7;
             this.explodeText();
 
             // Delay the fuckup
