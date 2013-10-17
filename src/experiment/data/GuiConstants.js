@@ -9,7 +9,7 @@ define(function() {
         letterHeight: 90,
         letterSpacing: 60,
         windVolume: 0.7,
-        ambiantVolume: 0.5,
+        ambiantVolume: 0.7,
         bipVolume: 0.5,
         bip2Volume: 0.4
         // showLetterPoints: false
