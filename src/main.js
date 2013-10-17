@@ -2,9 +2,6 @@ require.config({
     baseUrl: 'src/experiment',
     paths: {
         Stats: '../../lib/stats.min',
-        Leap: '../../lib/leap.min',
-        PIXI: '../../lib/pixi/bin/pixi',
-        THREE: '../../lib/threejs/build/three.min',
         dat: '../../lib/dat.gui.min',
         tinycolor: '../../lib/tinycolor.min',
         TweenMax: '../../lib/TweenMax.min',
@@ -14,15 +11,6 @@ require.config({
     shim: {
         'Stats': {
             exports: 'Stats'
-        },
-        'Leap': {
-            exports: 'Leap'
-        },
-        'PIXI': {
-            exports: 'PIXI'
-        },
-        'THREE': {
-            exports: 'THREE'
         },
         'dat': {
             exports: 'dat'

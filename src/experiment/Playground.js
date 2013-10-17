@@ -272,21 +272,27 @@ define(['helpers/Resize', 'helpers/MathHelper', 'entities/Letter', 'entities/Att
         },
 
         stopGlitch: function() {
-            Howler.Howler.mute();
+            // Howler.Howler.mute();
             TweenMax.to(this.canvas, 1.5, {opacity: 0, ease: Elastic.easeOut, onStart: function() {
-                    cancelAnimationFrame(this.animationId);
                     this.bip.noteOff && this.bip.noteOff(0);
                     this.bip2.noteOff && this.bip2.noteOff(0);
                     this.bip.frequency.value = 0;
                     this.bip2.frequency.value = 0;
                     this.bip.disconnect();
                     this.bip2.disconnect();
-                    // document.body.removeChild(this.canvas);
                     this.tvScreen = new TvScreen();
                     this.endScreen = true;
                     this.trails = false;
-                    this.animationId = requestAnimationFrame(this.animate.bind(this));
-                    TweenMax.to(this.canvas, 1.5, {opacity: 1, ease: Elastic.easeIn});
+                    TweenMax.to(this.canvas, 1.5, {overwrite: "all", opacity: 1});
+                    TweenMax.to(this.tvScreen, 3, {opacity: 0.5});
+                    this.tvNoise = new Howl({
+                        urls: ['/sounds/tv-static.mp3'],
+                        autoplay: true,
+                        loop: true
+                    }).play().volume(1);
+                    setTimeout(function() {
+                        this.dispose();
+                    }.bind(this), 3500);
                 }.bind(this)
             });
         },
@@ -319,6 +325,14 @@ define(['helpers/Resize', 'helpers/MathHelper', 'entities/Letter', 'entities/Att
                 this.bip2 = this.audio.createOscillator(100, 0.2);
                 this.trails = true;
             }.bind(this), 2400);
+        },
+
+        dispose: function() {
+            cancelAnimationFrame(this.animationId);
+            TweenMax.to(this.canvas, 0.1, {scaleY: 0, /*opacity: 0,*/ ease: Cubic.easeInOut, onComplete: function() {
+                    Howler.Howler.mute();
+                }
+            });
         },
 
         createGUI: function() {
