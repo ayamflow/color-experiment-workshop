@@ -11,6 +11,8 @@ define(['helpers/Resize', 'helpers/MathHelper', 'entities/Letter', 'entities/Att
         document.body.appendChild(this.canvas);
         Resize.enableSmoothing(false);
 
+        window.addEventListener('resize', this.onResize.bind(this));
+
         this.drawScalines();
 
         this.centerButton();
@@ -101,8 +103,6 @@ define(['helpers/Resize', 'helpers/MathHelper', 'entities/Letter', 'entities/Att
 
             // Kick it
             this.createWord(this.words[this.wordIndex]);
-
-            window.addEventListener('resize', this.onResize.bind(this));
         },
 
         initAudio: function() {
@@ -141,7 +141,7 @@ define(['helpers/Resize', 'helpers/MathHelper', 'entities/Letter', 'entities/Att
             }.bind(this));
 
             // Listen for word changing done
-            GlobalSignals.textTransformCompleted.addOnce(this.explodeText.bind(this));
+            // GlobalSignals.textTransformCompleted.addOnce(this.explodeText.bind(this));
         },
 
         showText: function() {
@@ -365,7 +365,7 @@ define(['helpers/Resize', 'helpers/MathHelper', 'entities/Letter', 'entities/Att
         endAnimation: function() {
             // console.log('[endAnimation]');
             this.ambiant.fadeOut(0, 1500);
-            this.glitchInterval = 7;
+            this.glitchInterval = 4;
             this.explodeText();
 
             // Delay the fuckup
