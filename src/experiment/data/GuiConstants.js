@@ -11,7 +11,8 @@ define(function() {
         windVolume: 0.7,
         ambiantVolume: 0.7,
         bipVolume: 0.5,
-        bip2Volume: 0.4
+        bip2Volume: 0.4,
+        showStats: false
         // showLetterPoints: false
     };
 

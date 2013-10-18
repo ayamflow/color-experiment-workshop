@@ -1,4 +1,4 @@
-define(['helpers/Resize', 'helpers/MathHelper', 'entities/Letter', 'entities/Attractor', 'entities/Particle', 'helpers/ColorHelper', 'data/GlobalSignals', 'data/GuiConstants', 'entities/Glitcher', 'helpers/AudioHelper', 'Howler', 'Stats', 'entities/TvScreen'], function(Resize, MathHelper, Letter, Attractor, Particle, ColorHelper, GlobalSignals, GuiConstants, Glitcher, AudioHelper, Howler, Stats, TvScreen) {
+define(['helpers/Resize', 'helpers/MathHelper', 'entities/Letter', 'entities/Attractor', 'entities/Particle', 'helpers/ColorHelper', 'data/GlobalSignals', 'data/GuiConstants', 'entities/Glitcher', 'helpers/AudioHelper', 'Howler', 'Stats', 'entities/TvScreen', 'dat'], function(Resize, MathHelper, Letter, Attractor, Particle, ColorHelper, GlobalSignals, GuiConstants, Glitcher, AudioHelper, Howler, Stats, TvScreen, dat) {
 
     var Playground = function()
     {
@@ -62,8 +62,10 @@ define(['helpers/Resize', 'helpers/MathHelper', 'entities/Letter', 'entities/Att
         bootstrap: function() {
             // Kick it !
             this.init();
-            // this.debug();
-            // this.createGUI();
+            if(GuiConstants.showStats) {
+                this.debug();
+            }
+            this.createGUI();
             this.initAudio();
             this.animate();
         },
@@ -110,12 +112,29 @@ define(['helpers/Resize', 'helpers/MathHelper', 'entities/Letter', 'entities/Att
             this.windAudio = new Howl({
                 urls: ['sounds/ambiant-wind.mp3'],
                 autoplay: true
-            // }).volume(0).fadeIn(GuiConstants.windVolume, 1000);
             }).volume(GuiConstants.windVolume);
+            this.windAudio.on('play', function() {
+                this.windPlaying = true;
+            }.bind(this));
+            this.windAudio.on('pause', function() {
+                this.windPlaying = false;
+                this.windAudio.stop();
+            }.bind(this));
+
+            this.windPlaying = true;
             this.ambiant = new Howl({
                 urls: ['sounds/ambiant-dark.mp3'],
-                autoplay: false
+                autoplay: false,
+                loop: true
             });
+            this.ambiant.on('play', function() {
+                this.ambiantPlaying = true;
+            }.bind(this));
+            this.ambiant.on('pause', function() {
+                this.ambiantPlaying = false;
+                this.ambiant.stop();
+            }.bind(this));
+            this.ambiantPlaying = false;
         },
 
         playGlitchNoise: function(min, max) {
@@ -136,12 +155,8 @@ define(['helpers/Resize', 'helpers/MathHelper', 'entities/Letter', 'entities/Att
             GlobalSignals.trianglesAppeared.addOnce(this.showText.bind(this));
             GlobalSignals.particlesAppeared.add(function() {
                 this.windAudio.fadeOut(0, 1600);
-                // this.ambiant.play().volume(0).fadeIn(GuiConstants.ambiantVolume, 1600);
                 this.ambiant.play().volume(GuiConstants.ambiantVolume);
             }.bind(this));
-
-            // Listen for word changing done
-            // GlobalSignals.textTransformCompleted.addOnce(this.explodeText.bind(this));
         },
 
         showText: function() {
@@ -241,10 +256,6 @@ define(['helpers/Resize', 'helpers/MathHelper', 'entities/Letter', 'entities/Att
             });
         },
 
-        createFluid: function() {
-            this.fluid = new Fluid(Resize.screenWidth, Resize.screenHeight, 5000);
-        },
-
         onResize: function() {
             // Update size singleton
             Resize.onResize();
@@ -277,6 +288,7 @@ define(['helpers/Resize', 'helpers/MathHelper', 'entities/Letter', 'entities/Att
 
         animate: function()
         {
+            // Regular clear or no context clear
             if(this.trails) {
                 this.context.fillStyle = "rgba(0, 0, 0, 0.05";
                 this.context.fillRect(0, 0, Resize.screenWidth, Resize.screenHeight);
@@ -284,11 +296,17 @@ define(['helpers/Resize', 'helpers/MathHelper', 'entities/Letter', 'entities/Att
             else {
                 this.context.clearRect(0, 0, Resize.screenWidth, Resize.screenHeight);
             }
-            // this.stats.update();
 
+
+            if(GuiConstants.showStats) {
+                this.stats.update();
+            }
+
+            // Show TV Static
             if(this.endScreen) {
                 this.tvScreen.update(this.context);
             }
+            // Show letters & glitches
             else {
                 this.context.globalCompositeOperation = "lighter";
 
@@ -321,7 +339,6 @@ define(['helpers/Resize', 'helpers/MathHelper', 'entities/Letter', 'entities/Att
         },
 
         stopGlitch: function() {
-            // Howler.Howler.mute();
             TweenMax.to(this.canvas, 1.5, {opacity: 1, ease: Elastic.easeOut, onStart: function() {
                     this.bip.noteOff && this.bip.noteOff(0);
                     this.bip2.noteOff && this.bip2.noteOff(0);
@@ -389,21 +406,24 @@ define(['helpers/Resize', 'helpers/MathHelper', 'entities/Letter', 'entities/Att
 
         createGUI: function() {
             this.gui = new dat.GUI();
-            this.gui.add(GuiConstants, 'debug');
             this.gui.add(GuiConstants, 'drawAttractor');
 
             var letters = this.gui.addFolder("Letters");
             var widthUpdate = letters.add(GuiConstants, 'letterWidth').min(10).max(200);
             var heightUpdate = letters.add(GuiConstants, 'letterHeight').min(10).max(200);
-            var spacingUpdate = letters.add(GuiConstants, 'letterSpacing').min(10).max(200);
+            var spacingUpdate = letters.add(GuiConstants, 'letterSpacing').min(10).max(100);
 
             widthUpdate.onChange(function() {
                 GlobalSignals.letterWidthChanged.dispatch();
             });
 
-            heightUpdate.onChange(function() {
-                GlobalSignals.letterHeightChanged.dispatch();
-            });
+            heightUpdate.onChange(function(value) {
+                // GlobalSignals.letterHeightChanged.dispatch();
+                for(var i = 0; i < this.letterGroup.length; i++) {
+                    this.letterGroup[i].height = value;
+                    this.letterGroup[i].updateThreshold();
+                }
+            }.bind(this));
 
             spacingUpdate.onChange(function() {
                 GlobalSignals.letterSpacingChanged.dispatch();
@@ -412,26 +432,53 @@ define(['helpers/Resize', 'helpers/MathHelper', 'entities/Letter', 'entities/Att
             letters.open();
 
             var attractors = this.gui.addFolder("Attractors");
-            var mass = attractors.add(GuiConstants, 'mass').min(0).max(120);
-            var grav = attractors.add(GuiConstants, 'gravityConstant').min(0).max(100);
+            var mass = attractors.add(GuiConstants, 'mass').min(0).max(50);
+            var grav = attractors.add(GuiConstants, 'gravityConstant').min(0).max(10);
 
-            mass.onChange(function() {
+            mass.onChange(function(value) {
                 for(var i = 0; i < this.letterGroup.length; i++) {
                     for(var j = 0; j < this.letterGroup[i].letterPoints.length; j++) {
-                        this.letterGroup[i].letterPoints[j].attractor.mass = GuiConstants.mass;
+                        this.letterGroup[i].letterPoints[j].attractor.mass = value;
                     }
                 }
             }.bind(this));
 
-            grav.onChange(function() {
+            grav.onChange(function(value) {
                 for(var i = 0; i < this.letterGroup.length; i++) {
                     for(var j = 0; j < this.letterGroup[i].letterPoints.length; j++) {
-                        this.letterGroup[i].letterPoints[j].attractor.gravityConstant = GuiConstants.gravityConstant;
+                        this.letterGroup[i].letterPoints[j].attractor.gravityConstant = value;
                     }
                 }
             }.bind(this));
 
             attractors.open();
+
+            setTimeout(function() {
+                this.gui.close();
+            }.bind(this), 1500);
+
+            /*var sounds = this.gui.addFolder('Sound volume');
+            var windD = sounds.add(GuiConstants, 'windVolume').min(0).max(1);
+            var ambiantD = sounds.add(GuiConstants, 'ambiantVolume').min(0).max(1);
+            sounds.add(GuiConstants, 'bipVolume').min(0).max(1);
+            sounds.add(GuiConstants, 'bip2Volume').min(0).max(1);
+
+            windD.onChange(function(value) {
+                if(this.windPlaying) {
+                    console.log('windPlaying?', this.windPlaying, value.toFixed(2));
+                    this.windAudio.volume(value.toFixed(2));
+                }
+            }.bind(this));
+
+            ambiantD.onChange(function(value) {
+                if(this.ambiantPlaying) {
+                    console.log('ambiantPlaying?', this.ambiantPlaying, value.toFixed(2));
+                    this.ambiant.volume(value.toFixed(2));
+                    this.ambiant.volume(value.toFixed(2));
+                }
+            }.bind(this));
+
+            sounds.open();*/
         },
 
         debug: function() {

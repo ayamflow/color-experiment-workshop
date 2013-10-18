@@ -13,7 +13,7 @@ define(['data/Letters', 'entities/Vector', 'entities/LetterPoint', 'helpers/Math
 
         this.strokeWidth = 1;
         this.opacity = 0;
-        this.threshold = this.width > this.height ? this.width * 1.8 : this.height * 1.8;
+        this.updateThreshold();
 
         this.position = new Vector(x, y);
 
@@ -50,6 +50,10 @@ define(['data/Letters', 'entities/Vector', 'entities/LetterPoint', 'helpers/Math
                 index = ~~(Math.random() * (this.letterPoints.length - 2));
                 this.letterPoints[index].showing = true;
             }
+        },
+
+        updateThreshold: function() {
+            this.threshold = this.width > this.height ? this.width * 1.8 : this.height * 1.8;
         },
 
         playTl: function() {
